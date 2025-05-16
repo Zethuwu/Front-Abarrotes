@@ -1,0 +1,151 @@
+<div class="productos-container">
+  <div class="productos-header">
+    <h1>Productos</h1>
+    <button class="btn btn-primary" (click)="openForm()">Nuevo Producto</button>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-spinner">
+      <div class="spinner-border"></div>
+      <p>Cargando productos...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    @if (productos().length === 0) {
+      <div class="alert alert-info">
+        No hay productos registrados. Crea uno nuevo haciendo clic en "Nuevo Producto".
+      </div>
+    } @else {
+      <div class="productos-grid">
+        @for (producto of productos(); track producto.id) {
+          <div class="producto-card">
+            <div class="producto-imagen">
+              <img [src]="producto.imagen_url || 'assets/placeholder.png'" [alt]="producto.nombre">
+            </div>
+            <div class="producto-info">
+              <h3>{{ producto.nombre }}</h3>
+              <p class="producto-descripcion">{{ producto.descripcion }}</p>
+              <p class="producto-precio">${{ producto.precio.toFixed(2) }}</p>
+
+              <div class="producto-actions">
+                <button class="btn btn-sm btn-outline" (click)="openForm(producto)">Editar</button>
+                <button class="btn btn-sm btn-danger" (click)="deleteProducto(producto.id)">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- Modal de formulario -->
+  @if (showForm()) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>{{ editingProducto() ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+          <button class="btn-close" (click)="closeForm()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="productoForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <input
+                type="text"
+                id="nombre"
+                formControlName="nombre"
+                class="form-control"
+                [class.is-invalid]="productoForm.get('nombre')?.invalid && productoForm.get('nombre')?.touched"
+              >
+              @if (productoForm.get('nombre')?.invalid && productoForm.get('nombre')?.touched) {
+                <div class="invalid-feedback">
+                  El nombre es requerido
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="descripcion">Descripción</label>
+              <textarea
+                id="descripcion"
+                formControlName="descripcion"
+                class="form-control"
+                [class.is-invalid]="productoForm.get('descripcion')?.invalid && productoForm.get('descripcion')?.touched"
+              ></textarea>
+              @if (productoForm.get('descripcion')?.invalid && productoForm.get('descripcion')?.touched) {
+                <div class="invalid-feedback">
+                  La descripción es requerida
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="precio">Precio</label>
+              <input
+                type="number"
+                id="precio"
+                formControlName="precio"
+                class="form-control"
+                [class.is-invalid]="productoForm.get('precio')?.invalid && productoForm.get('precio')?.touched"
+              >
+              @if (productoForm.get('precio')?.invalid && productoForm.get('precio')?.touched) {
+                <div class="invalid-feedback">
+                  El precio es requerido y debe ser mayor o igual a 0
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="imagen_url">URL de Imagen</label>
+              <input
+                type="text"
+                id="imagen_url"
+                formControlName="imagen_url"
+                class="form-control"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="proveedor_id">Proveedor</label>
+              <select
+                id="proveedor_id"
+                formControlName="proveedor_id"
+                class="form-control"
+                [class.is-invalid]="productoForm.get('proveedor_id')?.invalid && productoForm.get('proveedor_id')?.touched"
+              >
+                <option [ngValue]="null">Seleccione un proveedor</option>
+                @for (proveedor of proveedores(); track proveedor.id) {
+                  <option [value]="proveedor.id">{{ proveedor.nombre }}</option>
+                }
+              </select>
+              @if (productoForm.get('proveedor_id')?.invalid && productoForm.get('proveedor_id')?.touched) {
+                <div class="invalid-feedback">
+                  Debe seleccionar un proveedor
+                </div>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="productoForm.invalid"
+              >
+                {{ editingProducto() ? 'Actualizar' : 'Crear' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

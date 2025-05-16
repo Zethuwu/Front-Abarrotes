@@ -1,0 +1,163 @@
+<div class="inventario-container">
+  <div class="inventario-header">
+    <h1>Inventario</h1>
+    <button class="btn btn-primary" (click)="openForm()">Nuevo Registro</button>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-spinner">
+      <div class="spinner-border"></div>
+      <p>Cargando inventario...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    @if (inventario().length === 0) {
+      <div class="alert alert-info">
+        No hay registros de inventario. Crea uno nuevo haciendo clic en "Nuevo Registro".
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad Actual</th>
+              <th>Cantidad Inicial</th>
+              <th>Mínimo Requerido</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of inventario(); track item.id) {
+              <tr [class]="getInventarioStatus(item)">
+                <td>{{ getProductoNombre(item.producto_id) }}</td>
+                <td>{{ item.cantidad_actual }}</td>
+                <td>{{ item.cantidad_inicial }}</td>
+                <td>{{ item.minimo_requerido }}</td>
+                <td>
+                  @if (getInventarioStatus(item) === 'agotado') {
+                    <span class="badge badge-danger">Agotado</span>
+                  } @else if (getInventarioStatus(item) === 'bajo') {
+                    <span class="badge badge-warning">Bajo</span>
+                  } @else {
+                    <span class="badge badge-success">Normal</span>
+                  }
+                </td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="openForm(item)">Editar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- Modal de formulario -->
+  @if (showForm()) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>{{ editingInventario() ? 'Editar Inventario' : 'Nuevo Registro de Inventario' }}</h2>
+          <button class="btn-close" (click)="closeForm()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="inventarioForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label for="producto_id">Producto</label>
+              <select
+                id="producto_id"
+                formControlName="producto_id"
+                class="form-control"
+                [class.is-invalid]="inventarioForm.get('producto_id')?.invalid && inventarioForm.get('producto_id')?.touched"
+                [disabled]="!!editingInventario()"
+              >
+                <option [ngValue]="null">Seleccione un producto</option>
+                @for (producto of productos(); track producto.id) {
+                  <option [value]="producto.id">{{ producto.nombre }}</option>
+                }
+              </select>
+              @if (inventarioForm.get('producto_id')?.invalid && inventarioForm.get('producto_id')?.touched) {
+                <div class="invalid-feedback">
+                  Debe seleccionar un producto
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="cantidad_actual">Cantidad Actual</label>
+              <input
+                type="number"
+                id="cantidad_actual"
+                formControlName="cantidad_actual"
+                class="form-control"
+                [class.is-invalid]="inventarioForm.get('cantidad_actual')?.invalid && inventarioForm.get('cantidad_actual')?.touched"
+              >
+              @if (inventarioForm.get('cantidad_actual')?.invalid && inventarioForm.get('cantidad_actual')?.touched) {
+                <div class="invalid-feedback">
+                  La cantidad actual es requerida y debe ser mayor o igual a 0
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="cantidad_inicial">Cantidad Inicial</label>
+              <input
+                type="number"
+                id="cantidad_inicial"
+                formControlName="cantidad_inicial"
+                class="form-control"
+                [class.is-invalid]="inventarioForm.get('cantidad_inicial')?.invalid && inventarioForm.get('cantidad_inicial')?.touched"
+              >
+              @if (inventarioForm.get('cantidad_inicial')?.invalid && inventarioForm.get('cantidad_inicial')?.touched) {
+                <div class="invalid-feedback">
+                  La cantidad inicial es requerida y debe ser mayor o igual a 0
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="minimo_requerido">Mínimo Requerido</label>
+              <input
+                type="number"
+                id="minimo_requerido"
+                formControlName="minimo_requerido"
+                class="form-control"
+                [class.is-invalid]="inventarioForm.get('minimo_requerido')?.invalid && inventarioForm.get('minimo_requerido')?.touched"
+              >
+              @if (inventarioForm.get('minimo_requerido')?.invalid && inventarioForm.get('minimo_requerido')?.touched) {
+                <div class="invalid-feedback">
+                  El mínimo requerido es requerido y debe ser mayor o igual a 0
+                </div>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="inventarioForm.invalid"
+              >
+                {{ editingInventario() ? 'Actualizar' : 'Crear' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+s

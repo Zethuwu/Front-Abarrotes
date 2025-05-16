@@ -1,0 +1,136 @@
+<div class="clientes-container">
+  <div class="clientes-header">
+    <h1>Clientes</h1>
+    <button class="btn btn-primary" (click)="openForm()">Nuevo Cliente</button>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-spinner">
+      <div class="spinner-border"></div>
+      <p>Cargando clientes...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    @if (clientes().length === 0) {
+      <div class="alert alert-info">
+        No hay clientes registrados. Crea uno nuevo haciendo clic en "Nuevo Cliente".
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Email</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cliente of clientes(); track cliente.id) {
+              <tr>
+                <td>{{ cliente.id }}</td>
+                <td>{{ cliente.nombre }}</td>
+                <td>{{ cliente.apellido }}</td>
+                <td>{{ cliente.email }}</td>
+                <td>
+                  <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="openForm(cliente)">Editar</button>
+                    <button class="btn btn-sm btn-danger" (click)="deleteCliente(cliente.id)">Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- Modal de formulario -->
+  @if (showForm()) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>{{ editingCliente() ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2>
+          <button class="btn-close" (click)="closeForm()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <form [formGroup]="clienteForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <input
+                type="text"
+                id="nombre"
+                formControlName="nombre"
+                class="form-control"
+                [class.is-invalid]="clienteForm.get('nombre')?.invalid && clienteForm.get('nombre')?.touched"
+              >
+              @if (clienteForm.get('nombre')?.invalid && clienteForm.get('nombre')?.touched) {
+                <div class="invalid-feedback">
+                  El nombre es requerido
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="apellido">Apellido</label>
+              <input
+                type="text"
+                id="apellido"
+                formControlName="apellido"
+                class="form-control"
+                [class.is-invalid]="clienteForm.get('apellido')?.invalid && clienteForm.get('apellido')?.touched"
+              >
+              @if (clienteForm.get('apellido')?.invalid && clienteForm.get('apellido')?.touched) {
+                <div class="invalid-feedback">
+                  El apellido es requerido
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                class="form-control"
+                [class.is-invalid]="clienteForm.get('email')?.invalid && clienteForm.get('email')?.touched"
+              >
+              @if (clienteForm.get('email')?.invalid && clienteForm.get('email')?.touched) {
+                <div class="invalid-feedback">
+                  @if (clienteForm.get('email')?.errors?.['required']) {
+                    El email es requerido
+                  } @else if (clienteForm.get('email')?.errors?.['email']) {
+                    Debe ingresar un email válido
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="clienteForm.invalid"
+              >
+                {{ editingCliente() ? 'Actualizar' : 'Crear' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

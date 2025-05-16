@@ -1,0 +1,118 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  height: 64px;
+  background-color: #2c3e50;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .navbar-brand {
+    a {
+      display: flex;
+      align-items: center;
+      color: white;
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 600;
+
+      .brand-icon {
+        margin-right: 0.5rem;
+        font-size: 1.5rem;
+      }
+    }
+  }
+
+  .navbar-menu {
+    display: flex;
+    margin-left: 2rem;
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+
+      &:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &.active {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  .navbar-end {
+    margin-left: auto;
+
+    .btn-outline {
+      color: white;
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: white;
+      }
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  background-color: #f8f9fa;
+
+  &.with-navbar {
+    padding-top: 64px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 1rem;
+
+    .navbar-brand {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .navbar-menu {
+      margin-left: 0;
+      width: 100%;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .navbar-end {
+      width: 100%;
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+
+  .main-content.with-navbar {
+    padding-top: 0;
+  }
+}

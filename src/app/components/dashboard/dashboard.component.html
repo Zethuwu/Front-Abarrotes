@@ -1,0 +1,83 @@
+<div class="dashboard-container">
+  <h1>Dashboard - Abarrotes el Zorro</h1>
+
+  @if (error()) {
+    <div class="alert alert-danger">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-spinner">
+      <div class="spinner-border"></div>
+      <p>Cargando datos...</p>
+    </div>
+  }
+
+  @if (!loading()) {
+    <div class="dashboard-grid">
+      <!-- Resumen de Inventario -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h2>Inventario Bajo</h2>
+        </div>
+        <div class="card-body">
+          @if (inventarioBajo().length > 0) {
+            <div class="alert alert-warning">
+              Hay {{ inventarioBajo().length }} productos con inventario bajo
+            </div>
+
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Actual</th>
+                  <th>Mínimo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of inventarioBajo(); track item.id) {
+                  <tr>
+                    <td>{{ item.producto?.nombre || 'Producto #' + item.producto_id }}</td>
+                    <td>{{ item.cantidad_actual }}</td>
+                    <td>{{ item.minimo_requerido }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="alert alert-success">
+              Todos los productos tienen inventario suficiente
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Productos Recientes -->
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h2>Productos Recientes</h2>
+        </div>
+        <div class="card-body">
+          <div class="productos-grid">
+            @for (producto of productos().slice(0, 4); track producto.id) {
+              <div class="producto-card">
+                <div class="producto-imagen">
+                  <img [src]="producto.imagen_url || 'assets/placeholder.png'" [alt]="producto.nombre">
+                </div>
+                <div class="producto-info">
+                  <h3>{{ producto.nombre }}</h3>
+                  <p class="producto-precio">${{ producto.precio.toFixed(2) }}</p>
+                </div>
+              </div>
+            }
+          </div>
+
+          <button class="btn btn-primary" routerLink="/productos">
+            Ver todos los productos
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
