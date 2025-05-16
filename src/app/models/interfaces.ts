@@ -22,7 +22,7 @@ export interface Producto {
   imagen_url: string;
   nombre: string;
   precio: number;
-  proveedor_id: number;
+  proveedorId: number;
   proveedor?: Proveedor;
   inventario?: Inventario;
 }

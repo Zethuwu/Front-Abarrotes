@@ -114,12 +114,12 @@
             </div>
 
             <div class="form-group">
-              <label for="proveedor_id">Proveedor</label>
+              <label for="proveedorId">Proveedor</label>
               <select
-                id="proveedor_id"
-                formControlName="proveedor_id"
+                id="proveedorId"
+                formControlName="proveedorId"
                 class="form-control"
-                [class.is-invalid]="productoForm.get('proveedor_id')?.invalid && productoForm.get('proveedor_id')?.touched"
+                [class.is-invalid]="productoForm.get('proveedorId')?.invalid && productoForm.get('proveedorId')?.touched"
               >
                 <option [ngValue]="null">Seleccione un proveedor</option>
                 @for (proveedor of proveedores(); track proveedor.id) {
@@ -131,6 +131,23 @@
                   Debe seleccionar un proveedor
                 </div>
               }
+            </div>
+
+            <div formGroupName="inventarioDTO">
+              <div class="form-group">
+                <label for="cantidadActual">Cantidad Actual</label>
+                <input type="number" id="cantidadActual" formControlName="cantidadActual" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="cantidadInicial">Cantidad Inicial</label>
+                <input type="number" id="cantidadInicial" formControlName="cantidadInicial" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="minimoRequerido">Mínimo Requerido</label>
+                <input type="number" id="minimoRequerido" formControlName="minimoRequerido" class="form-control">
+              </div>
             </div>
 
             <div class="form-actions">

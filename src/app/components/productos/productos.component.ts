@@ -27,12 +27,18 @@ export class ProductosComponent implements OnInit {
     private apiService: ApiService,
     private fb: FormBuilder
   ) {
-    this.productoForm = this.fb.group({
-      nombre: ['', [Validators.required]],
-      descripcion: ['', [Validators.required]],
-      precio: [0, [Validators.required, Validators.min(0)]],
-      imagen_url: [''],
-      proveedor_id: [null, [Validators.required]]
+        this.productoForm = this.fb.group({
+          nombre: ['', [Validators.required]],
+          descripcion: ['', [Validators.required]],
+          precio: [0, [Validators.required, Validators.min(0)]],
+          imagenUrl: [''],
+          status: ['CREADO_CORRECTAMENTE'],
+          proveedorId: [null, [Validators.required]],
+          inventarioDTO: this.fb.group({
+            cantidadActual: [0, [Validators.required, Validators.min(0)]],
+            cantidadInicial: [0, [Validators.required, Validators.min(0)]],
+            minimoRequerido: [0, [Validators.required, Validators.min(0)]]
+          })
     });
   }
 
@@ -68,25 +74,39 @@ export class ProductosComponent implements OnInit {
   }
 
   openForm(producto?: Producto): void {
-    if (producto) {
-      this.editingProducto.set(producto);
-      this.productoForm.patchValue({
-        nombre: producto.nombre,
-        descripcion: producto.descripcion,
-        precio: producto.precio,
-        imagen_url: producto.imagen_url,
-        proveedor_id: producto.proveedor_id
-      });
-    } else {
-      this.editingProducto.set(null);
-      this.productoForm.reset({
-        precio: 0,
-        proveedor_id: null
-      });
-    }
-
-    this.showForm.set(true);
+  if (producto) {
+    this.editingProducto.set(producto);
+    this.productoForm.patchValue({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      precio: producto.precio,
+      imagenUrl: producto.imagen_url,
+      proveedorId: producto.proveedorId,
+      inventarioDTO: {
+        cantidadActual: producto.inventario?.cantidad_actual ?? 0,
+        cantidadInicial: producto.inventario?.cantidad_inicial ?? 0,
+        minimoRequerido: producto.inventario?.minimo_requerido ?? 0
+      }
+    });
+  } else {
+    this.editingProducto.set(null);
+    this.productoForm.reset({
+      nombre: '',
+      descripcion: '',
+      precio: 0,
+      imagenUrl: '',
+      proveedor_id: null,
+      inventarioDTO: {
+        cantidadActual: 0,
+        cantidadInicial: 0,
+        minimoRequerido: 0
+      }
+    });
   }
+
+  this.showForm.set(true);
+}
+
 
   closeForm(): void {
     this.showForm.set(false);
