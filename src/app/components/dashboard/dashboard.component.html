@@ -38,9 +38,8 @@
               <tbody>
                 @for (item of inventarioBajo(); track item.id) {
                   <tr>
-                    <td>{{ item.producto?.nombre || 'Producto #' + item.producto_id }}</td>
-                    <td>{{ item.cantidad_actual }}</td>
-                    <td>{{ item.minimo_requerido }}</td>
+                    <td>{{ item.cantidadActual }}</td>
+                    <td>{{ item.minimoRequerido }}</td>
                   </tr>
                 }
               </tbody>

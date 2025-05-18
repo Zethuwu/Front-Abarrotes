@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import {
   Producto,
-  Inventario,
+  InventarioDTO,
   Proveedor,
   Cliente,
   Factura,
@@ -42,38 +42,25 @@ export class ApiService {
     return this.http.delete<void>(`${this.apiUrl}/product-service/${id}`);
   }
 
-  // Inventario
-  getInventario(): Observable<Inventario[]> {
-    return this.http.get<Inventario[]>(`${this.apiUrl}/inventario`);
-  }
-
-  getInventarioItem(id: number): Observable<Inventario> {
-    return this.http.get<Inventario>(`${this.apiUrl}/inventario/${id}`);
-  }
-
-  updateInventario(id: number, inventario: Inventario): Observable<Inventario> {
-    return this.http.put<Inventario>(`${this.apiUrl}/inventario/${id}`, inventario);
-  }
-
   // Proveedores
   getProveedores(): Observable<Proveedor[]> {
-    return this.http.get<Proveedor[]>(`${this.apiUrl}/proveedor-service/proveedors`);
+    return this.http.get<Proveedor[]>(`${this.apiUrl}/supplier-service/suppliers`);
   }
 
   getProveedor(id: number): Observable<Proveedor> {
-    return this.http.get<Proveedor>(`${this.apiUrl}/proveedor-service/${id}`);
+    return this.http.get<Proveedor>(`${this.apiUrl}/supplier-service/find-by-id/${id}`);
   }
 
   createProveedor(proveedor: Proveedor): Observable<Proveedor> {
-    return this.http.post<Proveedor>(`${this.apiUrl}/proveedor-service/create`, proveedor);
+    return this.http.post<Proveedor>(`${this.apiUrl}/supplier-service/create`, proveedor);
   }
 
   updateProveedor(id: number, proveedor: Proveedor): Observable<Proveedor> {
-    return this.http.put<Proveedor>(`${this.apiUrl}/proveedor-service/${id}`, proveedor);
+    return this.http.put<Proveedor>(`${this.apiUrl}/supplier-service/update/${id}`, proveedor);
   }
 
   deleteProveedor(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/proveedor-service/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/supplier-service/delete/${id}`);
   }
 
   // Clientes
@@ -144,7 +131,7 @@ export class ApiService {
     return this.http.get<Rol[]>(`${this.apiUrl}/roles`);
   }
 
-  createInventario(inventario: Inventario): Observable<Inventario> {
-    return this.http.post<Inventario>(`${this.apiUrl}/inventario`, inventario)
+  createInventario(inventario: InventarioDTO): Observable<InventarioDTO> {
+    return this.http.post<InventarioDTO>(`${this.apiUrl}/inventario`, inventario)
   }
 }

@@ -8,7 +8,7 @@ import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/usuario-service`;
+  private apiUrl = `${environment.apiUrl}/user-service`;
   private isBrowser: boolean;
 
   private currentUserSignal = signal<Usuario | null>(null);

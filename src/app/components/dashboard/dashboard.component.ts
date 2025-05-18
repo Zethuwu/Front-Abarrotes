@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ApiService } from '../../services/api.service';
-import { Producto, Inventario } from '../../models/interfaces';
+import { Producto, InventarioDTO } from '../../models/interfaces';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -15,7 +15,7 @@ import { RouterModule } from '@angular/router';
 export class DashboardComponent implements OnInit {
   // Usando signals para el estado
   productos = signal<Producto[]>([]);
-  inventarioBajo = signal<Inventario[]>([]);
+  inventarioBajo = signal<InventarioDTO[]>([]);
   loading = signal(true);
   error = signal('');
 
@@ -42,6 +42,7 @@ export class DashboardComponent implements OnInit {
     });
 
     // Obtener inventario bajo
+    /*
     this.apiService.getInventario().subscribe({
       next: (inventario) => {
         // Filtrar productos con inventario bajo
@@ -53,5 +54,6 @@ export class DashboardComponent implements OnInit {
         console.error('Error loading inventario', err);
       }
     });
+    */
   }
 }

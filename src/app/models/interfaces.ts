@@ -24,16 +24,15 @@ export interface Producto {
   precio: number;
   proveedorId: number;
   proveedor?: Proveedor;
-  inventario?: Inventario;
+  inventarioDTO?: InventarioDTO;
 }
 
-export interface Inventario {
+export interface InventarioDTO {
   id: number;
-  cantidad_actual: number;
-  cantidad_inicial: number;
-  minimo_requerido: number;
+  cantidadActual: number;
+  cantidadInicial: number;
+  minimoRequerido: number;
   producto_id: number;
-  producto?: Producto;
 }
 
 export interface Usuario {
