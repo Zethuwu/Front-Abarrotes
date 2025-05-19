@@ -37,6 +37,9 @@ export const routes: Routes = [
     loadComponent: () => import('./components/facturas/facturas.component').then(m => m.FacturasComponent),
     canActivate: [authGuard]
   },
+  { path: 'corte-caja', loadComponent: () => import('./components/corte-caja/corte-caja.component').then(m => m.CorteCajaComponent),
+    canActivate: [authGuard]
+  },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: '/dashboard' }
 ];

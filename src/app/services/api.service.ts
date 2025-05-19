@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import { FormGroup } from '@angular/forms';
 import {
   Producto,
   InventarioDTO,
@@ -10,7 +11,8 @@ import {
   Factura,
   DetalleFactura,
   Usuario,
-  Rol
+  Rol,
+  CorteCajaDTO
 } from '../models/interfaces';
 
 @Injectable({
@@ -133,5 +135,10 @@ export class ApiService {
 
   createInventario(inventario: InventarioDTO): Observable<InventarioDTO> {
     return this.http.post<InventarioDTO>(`${this.apiUrl}/inventario`, inventario)
+  }
+
+  //Corte de caja
+  getCorteDeCajaPorFecha(fecha: string): Observable<CorteCajaDTO[]>{
+    return this.http.get<CorteCajaDTO[]>(`${this.apiUrl}/audit-service/date/${fecha}`);
   }
 }

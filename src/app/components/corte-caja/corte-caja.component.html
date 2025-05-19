@@ -1,0 +1,29 @@
+<div class="corte-caja-container">
+  <h1 class="corte-caja-title">Corte de Caja</h1>
+
+  <form [formGroup]="form" (ngSubmit)="buscarCorteCaja()" class="fecha-form">
+    <label for="fecha">Fecha:</label>
+    <input type="date" id="fecha" formControlName="fecha" />
+    <button type="submit">Buscar</button>
+  </form>
+
+  <div *ngIf="loading()" class="loading">Cargando datos...</div>
+  <div *ngIf="error()" class="error">{{ error() }}</div>
+
+  <div class="table-container" *ngIf="!loading() && corteCaja().length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad Vendida</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of corteCaja()">
+          <td>{{ item.nombreProducto }}</td>
+          <td>{{ item.cantidadVendida }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

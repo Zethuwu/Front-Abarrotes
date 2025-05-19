@@ -27,7 +27,6 @@
         <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Correo</th>
               <th>Acciones</th>
@@ -36,7 +35,6 @@
           <tbody>
             @for (proveedor of proveedores(); track proveedor.id) {
               <tr>
-                <td>{{ proveedor.id }}</td>
                 <td>{{ proveedor.nombre }}</td>
                 <td>{{ proveedor.correo }}</td>
                 <td>

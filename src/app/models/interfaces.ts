@@ -82,3 +82,8 @@ export interface LoginResponse {
   token: string;
   usuario: Usuario;
 }
+
+export interface CorteCajaDTO{
+  nombreProducto: string;
+  cantidadVendida: number;
+}
