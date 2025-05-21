@@ -40,3 +40,23 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Node.js dependencies
+node_modules/
+dist/
+.env
+
+# Angular output
+.angular/
+.angular/cache/
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS-specific
+.DS_Store
+Thumbs.db
+

@@ -40,8 +40,7 @@ export class DashboardComponent implements OnInit {
         this.loading.set(false);
       }
     });
-
-    // Obtener inventario bajo
+    /*    // Obtener inventario bajo
     this.apiService.getInventario().subscribe({
       next: (inventario) => {
         // Filtrar productos con inventario bajo
@@ -52,6 +51,6 @@ export class DashboardComponent implements OnInit {
       error: (err) => {
         console.error('Error loading inventario', err);
       }
-    });
+    });*/
   }
 }

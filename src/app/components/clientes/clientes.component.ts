@@ -53,6 +53,7 @@ export class ClientesComponent implements OnInit {
 
   openForm(cliente?: Cliente): void {
     if (cliente) {
+      console.log('Editando cliente:', cliente);
       this.editingCliente.set(cliente);
       this.clienteForm.patchValue({
         nombre: cliente.nombre,

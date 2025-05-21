@@ -3,12 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-import { LoginRequest, Usuario } from '../models/interfaces';
+import { LoginRequest, Rol, Usuario } from '../models/interfaces';
 import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/usuario-service`;
+  private apiUrl = `${environment.apiUrl}`;
   private isBrowser: boolean;
 
   private currentUserSignal = signal<Usuario | null>(null);
@@ -44,9 +44,14 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return null; // no usamos token ahora
+    return null; // no usamos token todavía
   }
 
+
+  hasRole(role: Rol): boolean {
+  const user = this.currentUserSignal();
+  return user?.roles?.includes(role) ?? false;
+}
   private loadUserFromStorage(): void {
     const userStr = localStorage.getItem('user');
     if (userStr) {

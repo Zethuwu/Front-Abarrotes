@@ -1,6 +1,7 @@
 
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,7 @@ export const routes: Routes = [
     loadComponent: () => import('./components/facturas/facturas.component').then(m => m.FacturasComponent),
     canActivate: [authGuard]
   },
+
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: '/dashboard' }
 ];

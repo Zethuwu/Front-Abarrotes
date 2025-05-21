@@ -3,18 +3,23 @@ export interface Factura {
   activa: boolean;
   fecha: Date;
   total: number;
-  cliente_id: number;
-  usuario_id: number;
+  clienteId: number;
+  usuarioId: number;
   detalles?: DetalleFactura[];
   cliente?: Cliente;
   usuario?: Usuario;
 }
 
-export interface Rol {
+
+
+export interface InventarioDTO {
   id: number;
-  nombre: string;
-  usuarios?: Usuario[];
+  cantidadActual: number;
+  cantidadInicial: number;
+  minimoRequerido: number;
+  producto_id: number;
 }
+
 
 export interface Producto {
   id: number;
@@ -24,7 +29,7 @@ export interface Producto {
   precio: number;
   proveedorId: number;
   proveedor?: Proveedor;
-  inventario?: Inventario;
+  inventarioDTO?: InventarioDTO;
 }
 
 export interface Inventario {
@@ -41,7 +46,7 @@ export interface Usuario {
   nombre: string;
   password: string;
   username: string;
-  roles?: Rol[];
+  roles: Rol[];
 }
 
 export interface Proveedor {
@@ -54,9 +59,9 @@ export interface Proveedor {
 export interface DetalleFactura {
   id: number;
   cantidad: number;
-  precio_unitario: number;
+  precioUnitario: number;
   factura_id: number;
-  producto_id: number;
+  productoId: number;
   producto?: Producto;
   factura?: Factura;
 }
@@ -82,4 +87,9 @@ export interface LoginRequest {
 export interface LoginResponse {
   token: string;
   usuario: Usuario;
+}
+
+export enum Rol {
+  ADMIN = 'ROLE_ADMIN',
+  USER = 'ROLE_USER'
 }

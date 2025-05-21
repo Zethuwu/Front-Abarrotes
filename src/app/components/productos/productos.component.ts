@@ -80,12 +80,12 @@ export class ProductosComponent implements OnInit {
       nombre: producto.nombre,
       descripcion: producto.descripcion,
       precio: producto.precio,
-      imagenUrl: producto.imagen_url,
+      imagen_url: producto.imagen_url,
       proveedorId: producto.proveedorId,
       inventarioDTO: {
-        cantidadActual: producto.inventario?.cantidad_actual ?? 0,
-        cantidadInicial: producto.inventario?.cantidad_inicial ?? 0,
-        minimoRequerido: producto.inventario?.minimo_requerido ?? 0
+        cantidadActual: producto.inventarioDTO?.cantidadActual ?? 0,
+        cantidadInicial: producto.inventarioDTO?.cantidadInicial ?? 0,
+        minimoRequerido: producto.inventarioDTO?.minimoRequerido ?? 0
       }
     });
   } else {

@@ -32,8 +32,8 @@ export class FacturasComponent implements OnInit {
     private fb: FormBuilder,
   ) {
     this.facturaForm = this.fb.group({
-      cliente_id: [null, [Validators.required]],
-      usuario_id: [null, [Validators.required]],
+      clienteId: [null, [Validators.required]],
+      usuarioId: [null, [Validators.required]],
       detalles: this.fb.array([]),
     })
   }
@@ -95,9 +95,9 @@ export class FacturasComponent implements OnInit {
 
   createDetalleFormGroup(): FormGroup {
     return this.fb.group({
-      producto_id: [null, [Validators.required]],
+      productoId: [null, [Validators.required]],
       cantidad: [1, [Validators.required, Validators.min(1)]],
-      precio_unitario: [0, [Validators.required, Validators.min(0)]],
+      precioUnitario: [0, [Validators.required, Validators.min(0)]],
     })
   }
 
@@ -111,12 +111,12 @@ export class FacturasComponent implements OnInit {
 
   updatePrecioUnitario(index: number): void {
     const detalleGroup = this.detallesArray.at(index) as FormGroup
-    const productoId = detalleGroup.get("producto_id")?.value
+    const productoId = detalleGroup.get("productoId")?.value
 
     if (productoId) {
       const producto = this.productos().find((p) => p.id === Number(productoId))
       if (producto) {
-        detalleGroup.get("precio_unitario")?.setValue(producto.precio)
+        detalleGroup.get("precioUnitario")?.setValue(producto.precio)
       }
     }
   }
@@ -133,8 +133,8 @@ export class FacturasComponent implements OnInit {
 
       // Cargar los datos de la factura
       this.facturaForm.patchValue({
-        cliente_id: factura.cliente_id,
-        usuario_id: factura.usuario_id,
+        clienteId: factura.clienteId,
+        usuarioId: factura.usuarioId,
       })
 
       // Cargar los detalles si existen
@@ -142,9 +142,9 @@ export class FacturasComponent implements OnInit {
         factura.detalles.forEach((detalle) => {
           const detalleGroup = this.createDetalleFormGroup()
           detalleGroup.patchValue({
-            producto_id: detalle.producto_id,
+            productoId: detalle.productoId,
             cantidad: detalle.cantidad,
-            precio_unitario: detalle.precio_unitario,
+            precioUnitario: detalle.precioUnitario,
           })
           this.detallesArray.push(detalleGroup)
         })
@@ -215,7 +215,7 @@ export class FacturasComponent implements OnInit {
     for (let i = 0; i < this.detallesArray.length; i++) {
       const detalle = this.detallesArray.at(i) as FormGroup
       const cantidad = detalle.get("cantidad")?.value || 0
-      const precioUnitario = detalle.get("precio_unitario")?.value || 0
+      const precioUnitario = detalle.get("precioUnitario")?.value || 0
 
       total += cantidad * precioUnitario
     }
@@ -294,9 +294,17 @@ export class FacturasComponent implements OnInit {
     return this.formatDate(fecha);
   }
 
-  get totalFacturaSeleccionada(): string {
-    const total = this.selectedFactura()?.total ?? 0;
-    return total.toFixed(2);
-  }
+ get totalFacturaSeleccionada(): string {
+  const factura = this.selectedFactura();
+  if (!factura || !factura.detalles || !factura.detalles.length) return "0.00";
+
+  const total = factura.detalles.reduce((acc, detalle) => {
+    const cantidad = detalle.cantidad ?? 0;
+    const precio = detalle.precioUnitario ?? 0;
+    return acc + cantidad * precio;
+  }, 0);
+
+  return total.toFixed(2);
+}
 
 }

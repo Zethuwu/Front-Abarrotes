@@ -41,8 +41,8 @@
               <tr>
                 <td>{{ factura.id }}</td>
                 <td>{{ formatDate(factura.fecha) }}</td>
-                <td>{{ getClienteNombre(factura.cliente_id) }}</td>
-                <td>{{ getUsuarioNombre(factura.usuario_id) }}</td>
+                <td>{{ getClienteNombre(factura.clienteId) }}</td>
+                <td>{{ getUsuarioNombre(factura.usuarioId) }}</td>
                 <td>${{ factura.total.toFixed(2) }}</td>
                 <td>
                   @if (factura.activa) {
@@ -82,7 +82,7 @@
                 <label for="cliente_id">Cliente</label>
                 <select
                   id="cliente_id"
-                  formControlName="cliente_id"
+                  formControlName="clienteId"
                   class="form-control"
                   [class.is-invalid]="facturaForm.get('cliente_id')?.invalid && facturaForm.get('cliente_id')?.touched"
                 >
@@ -102,7 +102,7 @@
                 <label for="usuario_id">Usuario</label>
                 <select
                   id="usuario_id"
-                  formControlName="usuario_id"
+                  formControlName="usuarioId"
                   class="form-control"
                   [class.is-invalid]="facturaForm.get('usuario_id')?.invalid && facturaForm.get('usuario_id')?.touched"
                 >
@@ -134,7 +134,7 @@
                       <div class="form-group col-md-5">
                         <label>Producto</label>
                         <select
-                          formControlName="producto_id"
+                          formControlName="productoId"
                           class="form-control"
                           [class.is-invalid]="detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched"
                           (change)="updatePrecioUnitario($index)"
@@ -171,13 +171,13 @@
                         <label>Precio Unitario</label>
                         <input
                           type="number"
-                          formControlName="precio_unitario"
+                          formControlName="precioUnitario"
                           class="form-control"
-                          [class.is-invalid]="detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched"
+                          [class.is-invalid]="detalle.get('precioUnitario')?.invalid && detalle.get('precioUnitario')?.touched"
                           step="0.01"
                           min="0"
                         >
-                        @if (detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched) {
+                        @if (detalle.get('precioUnitario')?.invalid && detalle.get('precioUnitario')?.touched) {
                           <div class="invalid-feedback">
                             El precio debe ser mayor o igual a 0
                           </div>
@@ -240,7 +240,7 @@
 
               <div class="factura-cliente">
                 <h4>Cliente</h4>
-                <p>{{ getClienteNombre(selectedFactura()?.cliente_id || 0) }}</p>
+                <p>{{ getClienteNombre(selectedFactura()?.clienteId || 0) }}</p>
               </div>
             </div>
 
@@ -261,10 +261,10 @@
                     @if (selectedFactura()?.detalles && selectedFactura()?.detalles?.length) {
                       @for (detalle of selectedFactura()?.detalles || []; track detalle.id) {
                         <tr>
-                          <td>{{ getProductoNombre(detalle.producto_id) }}</td>
+                          <td>{{ getProductoNombre(detalle.productoId) }}</td>
                           <td>{{ detalle.cantidad }}</td>
-                          <td>${{ detalle.precio_unitario.toFixed(2) }}</td>
-                          <td>${{ (detalle.cantidad * detalle.precio_unitario).toFixed(2) }}</td>
+                          <td>${{ detalle.precioUnitario.toFixed(2) }}</td>
+                          <td>${{ (detalle.cantidad * detalle.precioUnitario).toFixed(2) }}</td>
                         </tr>
                       }
                     } @else {
@@ -284,7 +284,7 @@
             </div>
 
             <div class="factura-footer">
-              <p>Atendido por: {{ getUsuarioNombre(selectedFactura()?.usuario_id || 0) }}</p>
+              <p>Atendido por: {{ getUsuarioNombre(selectedFactura()?.usuarioId || 0) }}</p>
               <p>¡Gracias por su compra!</p>
             </div>
           </div>
