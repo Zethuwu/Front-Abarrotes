@@ -1,6 +1,5 @@
-
 import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth.guard';
+import { authGuard, adminGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -8,14 +7,24 @@ export const routes: Routes = [
     loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent)
   },
   {
+    path: 'unauthorized',
+    loadComponent: () => import('./components/unauthorized/unauthorized.component').then(m => m.UnauthorizedComponent)
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [authGuard]
   },
+  // Rutas que requieren permisos de ADMIN
   {
     path: 'productos',
-    loadComponent: () => import('./components/productos/productos.component').then(m => m.ProductosComponent),
-    canActivate: [authGuard]
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/productos/productos.component').then(m => m.ProductosComponent),
+        canActivate: [authGuard]
+      },
+    ]
   },
   {
     path: 'inventario',
@@ -24,20 +33,37 @@ export const routes: Routes = [
   },
   {
     path: 'proveedores',
-    loadComponent: () => import('./components/proveedores/proveedores.component').then(m => m.ProveedoresComponent),
-    canActivate: [authGuard]
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/proveedores/proveedores.component').then(m => m.ProveedoresComponent),
+        canActivate: [authGuard]
+      },
+    ]
   },
   {
     path: 'clientes',
-    loadComponent: () => import('./components/clientes/clientes.component').then(m => m.ClientesComponent),
-    canActivate: [authGuard]
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/clientes/clientes.component').then(m => m.ClientesComponent),
+        canActivate: [authGuard]
+      },
+    ]
   },
   {
     path: 'facturas',
-    loadComponent: () => import('./components/facturas/facturas.component').then(m => m.FacturasComponent),
-    canActivate: [authGuard]
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/facturas/facturas.component').then(m => m.FacturasComponent),
+        canActivate: [authGuard]
+      },
+    ]
   },
-  { path: 'corte-caja', loadComponent: () => import('./components/corte-caja/corte-caja.component').then(m => m.CorteCajaComponent),
+  {
+    path: 'corte-caja',
+    loadComponent: () => import('./components/corte-caja/corte-caja.component').then(m => m.CorteCajaComponent),
     canActivate: [authGuard]
   },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },

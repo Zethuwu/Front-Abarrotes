@@ -1,6 +1,4 @@
 import { Component } from '@angular/core';
-
-
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -40,6 +38,7 @@ export class LoginComponent {
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
         this.router.navigate(['/dashboard']);
+        this.loading = false;
       },
       error: (err) => {
         this.error = 'Usuario o contraseña incorrectos';
@@ -48,6 +47,4 @@ export class LoginComponent {
       }
     });
   }
-
-
 }

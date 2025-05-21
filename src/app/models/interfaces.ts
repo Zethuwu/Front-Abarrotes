@@ -40,7 +40,7 @@ export interface Usuario {
   nombre: string;
   password: string;
   username: string;
-  roles?: Rol[];
+  roles?:string[];
 }
 
 export interface Proveedor {

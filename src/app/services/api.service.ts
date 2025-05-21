@@ -33,7 +33,7 @@ export class ApiService {
   }
 
   createProducto(producto: Producto): Observable<Producto> {
-    return this.http.post<Producto>(`${this.apiUrl}/product-service/create`, producto);
+    return this.http.post<Producto>(`${this.apiUrl}/product-service/create`, producto, {withCredentials: true});
   }
 
   updateProducto(id: number, producto: Producto): Observable<Producto> {
@@ -46,7 +46,7 @@ export class ApiService {
 
   // Proveedores
   getProveedores(): Observable<Proveedor[]> {
-    return this.http.get<Proveedor[]>(`${this.apiUrl}/supplier-service/suppliers`);
+    return this.http.get<Proveedor[]>(`${this.apiUrl}/supplier-service/suppliers`, {withCredentials: true});
   }
 
   getProveedor(id: number): Observable<Proveedor> {

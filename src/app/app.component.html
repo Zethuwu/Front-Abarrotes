@@ -1,6 +1,6 @@
 <div class="app-container">
   <!-- Navbar - Solo se muestra si está autenticado y no está en la página de login -->
-  @if (authService.isAuthenticated() && currentRoute !== '/login') {
+  @if (authService.isAuthenticated() && authService.currentUser()?.roles && currentRoute !== '/login') {
     <nav class="navbar">
       <div class="navbar-brand">
         <a routerLink="/dashboard">
@@ -11,9 +11,13 @@
 
       <div class="navbar-menu">
         <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-        <a routerLink="/productos" routerLinkActive="active">Productos</a>
+        @if (authService.isAdmin()) {
+          <a routerLink="/productos" routerLinkActive="active">Productos</a>
+        }
         <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
+        @if (authService.isAdmin()) {
         <a routerLink="/proveedores" routerLinkActive="active">Proveedores</a>
+        }
         <a routerLink="/clientes" routerLinkActive="active">Clientes</a>
         <a routerLink="/facturas" routerLinkActive="active">Facturas</a>
         <a routerLink="/corte-caja" routerLinkActive="active">Corte de Caja</a>
