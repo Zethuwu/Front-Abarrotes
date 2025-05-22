@@ -22,23 +22,23 @@ export class ProductosComponent implements OnInit {
   productoForm: FormGroup;
   editingProducto = signal<Producto | null>(null);
   showForm = signal(false);
+  selectedFile = signal<File | null>(null);
 
   constructor(
     private apiService: ApiService,
     private fb: FormBuilder
   ) {
-        this.productoForm = this.fb.group({
-          nombre: ['', [Validators.required]],
-          descripcion: ['', [Validators.required]],
-          precio: [0, [Validators.required, Validators.min(0)]],
-          imagenUrl: [''],
-          status: ['CREADO_CORRECTAMENTE'],
-          proveedorId: [null, [Validators.required]],
-          inventarioDTO: this.fb.group({
-            cantidadActual: [0, [Validators.required, Validators.min(0)]],
-            cantidadInicial: [0, [Validators.required, Validators.min(0)]],
-            minimoRequerido: [0, [Validators.required, Validators.min(0)]]
-          })
+    this.productoForm = this.fb.group({
+      nombre: ['', [Validators.required]],
+      descripcion: ['', [Validators.required]],
+      precio: [0, [Validators.required, Validators.min(0)]],
+      imagenUrl: [''],
+      status: ['CREADO_CORRECTAMENTE'],
+      proveedorId: [null, [Validators.required]],
+      inventarioDTO: this.fb.group({
+        cantidadInicial: [0, [Validators.required, Validators.min(0)]],
+        minimoRequerido: [0, [Validators.required, Validators.min(0)]]
+      })
     });
   }
 
@@ -74,44 +74,69 @@ export class ProductosComponent implements OnInit {
   }
 
   openForm(producto?: Producto): void {
-  if (producto) {
-    this.editingProducto.set(producto);
-    this.productoForm.patchValue({
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      precio: producto.precio,
-      imagenUrl: producto.imagen_url,
-      proveedorId: producto.proveedorId,
-      inventarioDTO: {
-        cantidadActual: producto.inventarioDTO?.cantidadActual ?? 0,
-        cantidadInicial: producto.inventarioDTO?.cantidadInicial ?? 0,
-        minimoRequerido: producto.inventarioDTO?.minimoRequerido ?? 0
-      }
-    });
-  } else {
-    this.editingProducto.set(null);
-    this.productoForm.reset({
-      nombre: '',
-      descripcion: '',
-      precio: 0,
-      imagenUrl: '',
-      proveedor_id: null,
-      inventarioDTO: {
-        cantidadActual: 0,
-        cantidadInicial: 0,
-        minimoRequerido: 0
-      }
-    });
+    if (producto) {
+      this.editingProducto.set(producto);
+      this.productoForm.patchValue({
+        nombre: producto.nombre,
+        descripcion: producto.descripcion,
+        precio: producto.precio,
+        imagenUrl: producto.imagenUrl,
+        proveedorId: producto.proveedorId,
+        inventarioDTO: {
+          cantidadActual: producto.inventarioDTO?.cantidadActual ?? 0,
+          cantidadInicial: producto.inventarioDTO?.cantidadInicial ?? 0,
+          minimoRequerido: producto.inventarioDTO?.minimoRequerido ?? 0
+        }
+      });
+      // Limpiamos el archivo seleccionado al abrir el formulario
+      this.selectedFile.set(null);
+    } else {
+      this.editingProducto.set(null);
+      this.productoForm.reset({
+        nombre: '',
+        descripcion: '',
+        precio: 0,
+        imagenUrl: '',
+        proveedorId: null,
+        inventarioDTO: {
+          cantidadActual: 0,
+          cantidadInicial: 0,
+          minimoRequerido: 0
+        }
+      });
+      this.selectedFile.set(null);
+    }
+
+    this.showForm.set(true);
   }
-
-  this.showForm.set(true);
-}
-
 
   closeForm(): void {
     this.showForm.set(false);
     this.productoForm.reset();
     this.editingProducto.set(null);
+    this.selectedFile.set(null);
+  }
+
+  onFileSelected(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement.files && inputElement.files.length > 0) {
+      this.selectedFile.set(inputElement.files[0]);
+    }
+  }
+
+  getImageName(imagePath: string | undefined): string {
+    if (!imagePath) return 'No hay imagen';
+    // Obtener el nombre del archivo de la ruta completa
+    const parts = imagePath.split('/');
+    return parts[parts.length - 1];
+  }
+
+  // Nuevo método para manejar errores de carga de imágenes
+  handleImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    console.error('Error al cargar la imagen:', imgElement.src);
+    // Establecer una imagen de respaldo
+    imgElement.src = 'assets/placeholder.jpg';
   }
 
   onSubmit(): void {
@@ -125,12 +150,19 @@ export class ProductosComponent implements OnInit {
       // Actualizar producto existente
       this.apiService.updateProducto(this.editingProducto()!.id, productoData).subscribe({
         next: (updatedProducto) => {
-          // Actualizar la lista de productos
-          const updatedProductos = this.productos().map(p =>
-            p.id === updatedProducto.id ? updatedProducto : p
-          );
-          this.productos.set(updatedProductos);
-          this.closeForm();
+          console.log('Producto actualizado:', updatedProducto); // Depuración
+
+          // Si hay un archivo seleccionado, subimos la imagen
+          if (this.selectedFile()) {
+            this.uploadImage(updatedProducto.id, this.selectedFile()!);
+          } else {
+            // Si no hay archivo seleccionado, actualizamos la lista de productos
+            const updatedProductos = this.productos().map(p =>
+              p.id === updatedProducto.id ? updatedProducto : p
+            );
+            this.productos.set(updatedProductos);
+            this.closeForm();
+          }
         },
         error: (err) => {
           console.error('Error updating producto', err);
@@ -141,9 +173,16 @@ export class ProductosComponent implements OnInit {
       // Crear nuevo producto
       this.apiService.createProducto(productoData).subscribe({
         next: (newProducto) => {
-          // Añadir a la lista de productos
-          this.productos.set([...this.productos(), newProducto]);
-          this.closeForm();
+          console.log('Nuevo producto creado:', newProducto); // Depuración
+
+          // Si hay un archivo seleccionado, subimos la imagen
+          if (this.selectedFile()) {
+            this.uploadImage(newProducto.id, this.selectedFile()!);
+          } else {
+            // Si no hay archivo seleccionado, añadimos el producto a la lista
+            this.productos.set([...this.productos(), newProducto]);
+            this.closeForm();
+          }
         },
         error: (err) => {
           console.error('Error creating producto', err);
@@ -151,6 +190,37 @@ export class ProductosComponent implements OnInit {
         }
       });
     }
+  }
+
+  uploadImage(productoId: number, file: File): void {
+    console.log('Subiendo imagen para el producto ID:', productoId); // Depuración
+
+    this.apiService.uploadProductoImage(productoId, file).subscribe({
+      next: () => {
+        console.log('Imagen subida correctamente'); // Depuración
+
+        // Recargar los productos para obtener la URL de imagen actualizada
+        this.apiService.getProductos().subscribe({
+          next: (productos) => {
+            console.log('Productos actualizados después de subir imagen:', productos); // Depuración
+            this.productos.set(productos);
+            this.closeForm();
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error uploading image', err);
+        this.error.set('Error al subir la imagen');
+
+        // Aún así cerramos el formulario y actualizamos la lista, pero sin la imagen
+        this.apiService.getProductos().subscribe({
+          next: (productos) => {
+            this.productos.set(productos);
+            this.closeForm();
+          }
+        });
+      }
+    });
   }
 
   deleteProducto(id: number): void {

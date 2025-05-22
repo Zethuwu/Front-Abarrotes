@@ -4,6 +4,42 @@
     <button class="btn btn-primary" (click)="openForm()">Nueva Factura</button>
   </div>
 
+  <div class="facturas-filtros form-row" style="margin-bottom: 1.5rem;">
+    <div class="form-group col-md-4">
+      <label for="buscadorCliente">Buscar por Cliente</label>
+      <div class="d-flex" style="gap: 0.5rem;">
+        <input
+          id="buscadorCliente"
+          type="text"
+          class="form-control"
+          [(ngModel)]="busquedaCliente"
+          (keyup.enter)="buscarFacturasPorCliente()"
+          placeholder="Nombre del cliente"
+          autocomplete="off"
+        >
+        <button class="btn btn-sm btn-primary" (click)="buscarFacturasPorCliente()">Buscar</button>
+      </div>
+    </div>
+    <div class="form-group col-md-4">
+      <label for="buscadorUsuario">Buscar por Usuario</label>
+      <div class="d-flex" style="gap: 0.5rem;">
+        <input
+          id="buscadorUsuario"
+          type="text"
+          class="form-control"
+          [(ngModel)]="busquedaUsuario"
+          (keyup.enter)="buscarFacturasPorUsuario()"
+          placeholder="Nombre de usuario"
+          autocomplete="off"
+        >
+        <button class="btn btn-sm btn-primary" (click)="buscarFacturasPorUsuario()">Buscar</button>
+      </div>
+    </div>
+    <div class="form-group col-md-4 d-flex align-items-end">
+      <button class="btn btn-secondary" (click)="resetFiltros()">Ver todas</button>
+    </div>
+  </div>
+
   @if (error()) {
     <div class="alert alert-danger">
       {{ error() }}
@@ -27,7 +63,6 @@
         <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Fecha</th>
               <th>Cliente</th>
               <th>Usuario</th>
@@ -39,10 +74,9 @@
           <tbody>
             @for (factura of facturas(); track factura.id) {
               <tr>
-                <td>{{ factura.id }}</td>
                 <td>{{ formatDate(factura.fecha) }}</td>
-                <td>{{ getClienteNombre(factura.cliente_id) }}</td>
-                <td>{{ getUsuarioNombre(factura.usuario_id) }}</td>
+                <td>{{ getClienteNombre(factura.clienteId) }}</td>
+                <td>{{ getUsuarioNombre(factura.usuarioId) }}</td>
                 <td>${{ factura.total.toFixed(2) }}</td>
                 <td>
                   @if (factura.activa) {
@@ -79,43 +113,27 @@
           <form [formGroup]="facturaForm" (ngSubmit)="onSubmit()">
             <div class="form-row">
               <div class="form-group col-md-6">
-                <label for="cliente_id">Cliente</label>
+                <label for="cliente">Cliente</label>
                 <select
-                  id="cliente_id"
-                  formControlName="cliente_id"
+                  id="cliente"
                   class="form-control"
-                  [class.is-invalid]="facturaForm.get('cliente_id')?.invalid && facturaForm.get('cliente_id')?.touched"
+                  formControlName="clienteId"
+                  required
                 >
                   <option [ngValue]="null">Seleccione un cliente</option>
-                  @for (cliente of clientes(); track cliente.id) {
-                    <option [value]="cliente.id">{{ cliente.nombre }} {{ cliente.apellido }}</option>
-                  }
+                  <option *ngFor="let cliente of clientes()" [value]="cliente.id">{{ cliente.nombre }}</option>
                 </select>
-                @if (facturaForm.get('cliente_id')?.invalid && facturaForm.get('cliente_id')?.touched) {
-                  <div class="invalid-feedback">
-                    Debe seleccionar un cliente
-                  </div>
-                }
               </div>
 
               <div class="form-group col-md-6">
-                <label for="usuario_id">Usuario</label>
-                <select
-                  id="usuario_id"
-                  formControlName="usuario_id"
+                <label for="usuarioId">Usuario</label>
+                <input
+                  type="text"
                   class="form-control"
-                  [class.is-invalid]="facturaForm.get('usuario_id')?.invalid && facturaForm.get('usuario_id')?.touched"
+                  [value]="getUsuarioNombre(facturaForm.get('usuarioId')?.value || 0)"
+                  readonly
                 >
-                  <option [ngValue]="null">Seleccione un usuario</option>
-                  @for (usuario of usuarios(); track usuario.id) {
-                    <option [value]="usuario.id">{{ usuario.nombre }}</option>
-                  }
-                </select>
-                @if (facturaForm.get('usuario_id')?.invalid && facturaForm.get('usuario_id')?.touched) {
-                  <div class="invalid-feedback">
-                    Debe seleccionar un usuario
-                  </div>
-                }
+                <input type="hidden" formControlName="usuarioId">
               </div>
             </div>
 
@@ -134,7 +152,7 @@
                       <div class="form-group col-md-5">
                         <label>Producto</label>
                         <select
-                          formControlName="producto_id"
+                          formControlName="productoId"
                           class="form-control"
                           [class.is-invalid]="detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched"
                           (change)="updatePrecioUnitario($index)"
@@ -171,7 +189,7 @@
                         <label>Precio Unitario</label>
                         <input
                           type="number"
-                          formControlName="precio_unitario"
+                          formControlName="precioUnitario"
                           class="form-control"
                           [class.is-invalid]="detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched"
                           step="0.01"
@@ -240,7 +258,7 @@
 
               <div class="factura-cliente">
                 <h4>Cliente</h4>
-                <p>{{ getClienteNombre(selectedFactura()?.cliente_id || 0) }}</p>
+                <p>{{ getClienteNombre(selectedFactura()?.clienteId || 0) }}</p>
               </div>
             </div>
 
@@ -261,10 +279,10 @@
                     @if (selectedFactura()?.detalles && selectedFactura()?.detalles?.length) {
                       @for (detalle of selectedFactura()?.detalles || []; track detalle.id) {
                         <tr>
-                          <td>{{ getProductoNombre(detalle.producto_id) }}</td>
+                          <td>{{ getProductoNombre(detalle.productoId) }}</td>
                           <td>{{ detalle.cantidad }}</td>
-                          <td>${{ detalle.precio_unitario.toFixed(2) }}</td>
-                          <td>${{ (detalle.cantidad * detalle.precio_unitario).toFixed(2) }}</td>
+                          <td>${{ detalle.precioUnitario.toFixed(2) }}</td>
+                          <td>${{ (detalle.cantidad * detalle.precioUnitario).toFixed(2) }}</td>
                         </tr>
                       }
                     } @else {
@@ -284,14 +302,14 @@
             </div>
 
             <div class="factura-footer">
-              <p>Atendido por: {{ getUsuarioNombre(selectedFactura()?.usuario_id || 0) }}</p>
+              <p>Atendido por: {{ getUsuarioNombre(selectedFactura()?.usuarioId || 0) }}</p>
               <p>¡Gracias por su compra!</p>
             </div>
           </div>
 
           <div class="factura-actions">
             <button type="button" class="btn btn-secondary" (click)="closeDetalles()">Cerrar</button>
-            <button type="button" class="btn btn-primary">Imprimir</button>
+            <button type="button" class="btn btn-primary" (click)="imprimirFactura()">Imprimir</button>
           </div>
         </div>
       </div>

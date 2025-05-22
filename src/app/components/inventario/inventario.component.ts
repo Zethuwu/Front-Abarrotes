@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { Producto, Proveedor, InventarioDTO } from '../../models/interfaces';
 import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 
 @Component({
   selector: 'app-inventario',
@@ -23,6 +23,9 @@ export class InventarioComponent implements OnInit {
   editingProducto = signal<Producto | null>(null);
   showForm = signal(false);
 
+  showSolicitudModal = signal(false);
+  solicitudForm: FormGroup;
+
   constructor(
     private apiService: ApiService,
     private fb: FormBuilder
@@ -39,6 +42,15 @@ export class InventarioComponent implements OnInit {
             cantidadInicial: [0, [Validators.required, Validators.min(0)]],
             minimoRequerido: [0, [Validators.required, Validators.min(0)]]
           })
+    });
+
+    this.solicitudForm = this.fb.group({
+      productos: this.fb.array([
+        this.fb.group({
+          productoId: [null, Validators.required],
+          cantidadRequerida: [1, [Validators.required, Validators.min(1)]]
+        })
+      ])
     });
   }
 
@@ -108,5 +120,54 @@ export class InventarioComponent implements OnInit {
         }
       });
     }
+  }
+
+  productosArray(): FormArray {
+    return this.solicitudForm.get('productos') as FormArray;
+  }
+
+  openSolicitudModal(): void {
+    this.showSolicitudModal.set(true);
+    // Reinicia el formulario cada vez que se abre
+    this.solicitudForm.setControl('productos', this.fb.array([
+      this.fb.group({
+        productoId: [null, Validators.required],
+        cantidadRequerida: [1, [Validators.required, Validators.min(1)]]
+      })
+    ]));
+  }
+
+  closeSolicitudModal(): void {
+    this.showSolicitudModal.set(false);
+  }
+
+  addProducto(): void {
+    this.productosArray().push(
+      this.fb.group({
+        productoId: [null, Validators.required],
+        cantidadRequerida: [1, [Validators.required, Validators.min(1)]]
+      })
+    );
+  }
+
+  removeProducto(index: number): void {
+    if (this.productosArray().length > 1) {
+      this.productosArray().removeAt(index);
+    }
+  }
+
+  enviarSolicitud(): void {
+    if (this.solicitudForm.invalid) return;
+    const productosRequeridos = this.solicitudForm.value.productos;
+    this.apiService.enviarProductosRequeridos(productosRequeridos).subscribe({
+      next: () => {
+        alert('Solicitud enviada correctamente');
+        this.closeSolicitudModal();
+      },
+      error: (err) => {
+        alert('Error al enviar la solicitud');
+        console.error(err);
+      }
+    });
   }
 }

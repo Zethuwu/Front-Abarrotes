@@ -1,19 +1,20 @@
 import { Component, OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
-import { FormBuilder,  FormGroup,  FormArray, Validators, ReactiveFormsModule } from "@angular/forms"
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from "@angular/forms"
 import { ApiService } from "../../services/api.service"
+import { AuthService } from "../../services/auth.service"
 import { Factura, Cliente, Usuario, Producto } from "../../models/interfaces"
 import { RouterModule } from "@angular/router"
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: "app-facturas",
   templateUrl: "./facturas.component.html",
   styleUrls: ["./facturas.component.scss"],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule],
 })
 export class FacturasComponent implements OnInit {
-[x: string]: any
   facturas = signal<Factura[]>([])
   clientes = signal<Cliente[]>([])
   usuarios = signal<Usuario[]>([])
@@ -27,19 +28,27 @@ export class FacturasComponent implements OnInit {
   showDetalles = signal<number | null>(null)
   selectedFactura = signal<Factura | null>(null)
 
+  busquedaCliente = '';
+  busquedaUsuario = '';
+
   constructor(
     private apiService: ApiService,
+    private authService: AuthService,
     private fb: FormBuilder,
   ) {
     this.facturaForm = this.fb.group({
-      cliente_id: [null, [Validators.required]],
-      usuario_id: [null, [Validators.required]],
+      clienteId: [null, [Validators.required]],
+      usuarioId: [null, [Validators.required]],
       detalles: this.fb.array([]),
     })
   }
 
   ngOnInit(): void {
-    this.loadData()
+    this.loadData();
+    this.apiService.getUsuarios().subscribe({
+      next: (usuarios) => this.usuarios.set(usuarios),
+      error: () => this.usuarios.set([]),
+    });
   }
 
   loadData(): void {
@@ -95,9 +104,9 @@ export class FacturasComponent implements OnInit {
 
   createDetalleFormGroup(): FormGroup {
     return this.fb.group({
-      producto_id: [null, [Validators.required]],
+      productoId: [null, [Validators.required]],
       cantidad: [1, [Validators.required, Validators.min(1)]],
-      precio_unitario: [0, [Validators.required, Validators.min(0)]],
+      precioUnitario: [0, [Validators.required, Validators.min(0)]],
     })
   }
 
@@ -111,54 +120,59 @@ export class FacturasComponent implements OnInit {
 
   updatePrecioUnitario(index: number): void {
     const detalleGroup = this.detallesArray.at(index) as FormGroup
-    const productoId = detalleGroup.get("producto_id")?.value
+    const productoId = detalleGroup.get("productoId")?.value // ✅ camelCase correcto
 
     if (productoId) {
       const producto = this.productos().find((p) => p.id === Number(productoId))
       if (producto) {
-        detalleGroup.get("precio_unitario")?.setValue(producto.precio)
+        detalleGroup.get("precioUnitario")?.setValue(producto.precio)
       }
     }
   }
 
   openForm(factura?: Factura): void {
-    // Limpiar el formulario
-    this.facturaForm.reset()
+    this.facturaForm.reset();
     while (this.detallesArray.length) {
-      this.detallesArray.removeAt(0)
+      this.detallesArray.removeAt(0);
     }
 
     if (factura) {
-      this.editingFactura.set(factura)
-
-      // Cargar los datos de la factura
+      this.editingFactura.set(factura);
       this.facturaForm.patchValue({
-        cliente_id: factura.cliente_id,
-        usuario_id: factura.usuario_id,
-      })
-
-      // Cargar los detalles si existen
-      if (factura.detalles && factura.detalles.length > 0) {
-        factura.detalles.forEach((detalle) => {
-          const detalleGroup = this.createDetalleFormGroup()
-          detalleGroup.patchValue({
-            producto_id: detalle.producto_id,
-            cantidad: detalle.cantidad,
-            precio_unitario: detalle.precio_unitario,
-          })
-          this.detallesArray.push(detalleGroup)
-        })
-      } else {
-        // Si no hay detalles, añadir uno vacío
-        this.addDetalle()
-      }
+        clienteId: factura.clienteId,
+        usuarioId: factura.usuarioId,
+      });
+      // ...cargar detalles...
+      this.showForm.set(true);
     } else {
-      this.editingFactura.set(null)
-      // Añadir un detalle vacío para nueva factura
-      this.addDetalle()
-    }
+      this.editingFactura.set(null);
 
-    this.showForm.set(true)
+      // Obtén el username del usuario logueado
+      const usuarioActual = this.authService.currentUserSignal();
+      if (usuarioActual?.username) {
+        this.apiService.getUsuarioByUsername(usuarioActual.username).subscribe({
+          next: (usuarioCompleto) => {
+            this.facturaForm.patchValue({
+              usuarioId: usuarioCompleto.id
+            });
+            // Agrega el usuario a la lista si no existe
+            const usuariosActuales = this.usuarios();
+            if (!usuariosActuales.some(u => u.id === usuarioCompleto.id)) {
+              this.usuarios.set([...usuariosActuales, usuarioCompleto]);
+            }
+            this.addDetalle();
+            this.showForm.set(true);
+          },
+          error: () => {
+            this.addDetalle();
+            this.showForm.set(true);
+          }
+        });
+      } else {
+        this.addDetalle();
+        this.showForm.set(true);
+      }
+    }
   }
 
   closeForm(): void {
@@ -175,7 +189,6 @@ export class FacturasComponent implements OnInit {
     const facturaData = {
       ...this.facturaForm.value,
       fecha: new Date(),
-      activa: true,
       total: this.calcularTotal(),
     }
 
@@ -197,9 +210,11 @@ export class FacturasComponent implements OnInit {
       // Crear nueva factura
       this.apiService.createFactura(facturaData).subscribe({
         next: (newFactura) => {
-          // Añadir a la lista de facturas
-          this.facturas.set([...this.facturas(), newFactura])
-          this.closeForm()
+          this.facturas.set([...this.facturas(), newFactura]);
+          // Mostrar el resumen y agradecimiento
+          this.selectedFactura.set(newFactura);
+          this.showDetalles.set(newFactura.id);
+          this.closeForm();
         },
         error: (err) => {
           console.error("Error creating factura", err)
@@ -215,7 +230,7 @@ export class FacturasComponent implements OnInit {
     for (let i = 0; i < this.detallesArray.length; i++) {
       const detalle = this.detallesArray.at(i) as FormGroup
       const cantidad = detalle.get("cantidad")?.value || 0
-      const precioUnitario = detalle.get("precio_unitario")?.value || 0
+      const precioUnitario = detalle.get("precioUnitario")?.value || 0
 
       total += cantidad * precioUnitario
     }
@@ -229,8 +244,8 @@ export class FacturasComponent implements OnInit {
   }
 
   getUsuarioNombre(usuarioId: number): string {
-    const usuario = this.usuarios().find((u) => u.id === usuarioId)
-    return usuario ? usuario.nombre : `Usuario #${usuarioId}`
+    const usuario = this.usuarios().find(u => u.id === usuarioId);
+    return usuario ? usuario.nombre : `Usuario #${usuarioId}`;
   }
 
   getProductoNombre(productoId: number): string {
@@ -297,6 +312,68 @@ export class FacturasComponent implements OnInit {
   get totalFacturaSeleccionada(): string {
     const total = this.selectedFactura()?.total ?? 0;
     return total.toFixed(2);
+  }
+
+  onClienteSeleccionado(nombre: string) {
+    this.apiService.getCliente(nombre).subscribe({
+      next: (cliente) => {
+        this.facturaForm.patchValue({ cliente_id: cliente.id });
+      },
+      error: () => {
+        this.facturaForm.patchValue({ cliente_id: null });
+      }
+    });
+  }
+
+  buscarFacturasPorCliente(): void {
+    if (!this.busquedaCliente.trim()) return;
+    this.loading.set(true);
+    this.apiService.getFacturasByCliente(this.busquedaCliente.trim()).subscribe({
+      next: (facturas) => {
+        this.facturas.set(facturas);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set("No se encontraron facturas para ese cliente");
+        this.loading.set(false);
+      }
+    });
+  }
+
+  buscarFacturasPorUsuario(): void {
+    if (!this.busquedaUsuario.trim()) return;
+    this.loading.set(true);
+    this.apiService.getFacturasByUsuario(this.busquedaUsuario.trim()).subscribe({
+      next: (facturas) => {
+        this.facturas.set(facturas);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set("No se encontraron facturas para ese usuario");
+        this.loading.set(false);
+      }
+    });
+  }
+
+  resetFiltros(): void {
+    this.busquedaCliente = '';
+    this.busquedaUsuario = '';
+    this.loadData(); // Vuelve a cargar todas las facturas
+  }
+
+  imprimirFactura(): void {
+    const factura = this.selectedFactura();
+    if (!factura) return;
+
+    this.apiService.enviarFactura(factura.id).subscribe({
+      next: (mensaje) => {
+        alert(mensaje);
+      },
+      error: (err) => {
+        alert('Error al enviar la factura');
+        console.error(err);
+      }
+    });
   }
 
 }

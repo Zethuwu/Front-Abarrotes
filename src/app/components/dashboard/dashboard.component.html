@@ -62,7 +62,7 @@
             @for (producto of productos().slice(0, 4); track producto.id) {
               <div class="producto-card">
                 <div class="producto-imagen">
-                  <img [src]="producto.imagen_url || 'assets/placeholder.png'" [alt]="producto.nombre">
+                  <img [src]="producto.imagenUrl || 'assets/placeholder.jpg'" [alt]="producto.nombre">
                 </div>
                 <div class="producto-info">
                   <h3>{{ producto.nombre }}</h3>

@@ -21,7 +21,7 @@ import {
 export class ApiService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Productos
   getProductos(): Observable<Producto[]> {
@@ -33,20 +33,24 @@ export class ApiService {
   }
 
   createProducto(producto: Producto): Observable<Producto> {
-    return this.http.post<Producto>(`${this.apiUrl}/product-service/create`, producto, {withCredentials: true});
+    return this.http.post<Producto>(`${this.apiUrl}/product-service/create`, producto, { withCredentials: true });
   }
 
   updateProducto(id: number, producto: Producto): Observable<Producto> {
-    return this.http.put<Producto>(`${this.apiUrl}/product-service/${id}`, producto);
+    return this.http.put<Producto>(`${this.apiUrl}/product-service/update/${id}`, producto, { withCredentials: true });
   }
 
   deleteProducto(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/product-service/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/product-service/delete/${id}`, { withCredentials: true });
+  }
+
+  enviarProductosRequeridos(productosRequeridos: { productoId: number, cantidadRequerida: number }[]) {
+    return this.http.post(`${this.apiUrl}/export-service/required-products`, productosRequeridos, { responseType: 'text' });
   }
 
   // Proveedores
   getProveedores(): Observable<Proveedor[]> {
-    return this.http.get<Proveedor[]>(`${this.apiUrl}/supplier-service/suppliers`, {withCredentials: true});
+    return this.http.get<Proveedor[]>(`${this.apiUrl}/supplier-service/suppliers`, { withCredentials: true });
   }
 
   getProveedor(id: number): Observable<Proveedor> {
@@ -67,15 +71,15 @@ export class ApiService {
 
   // Clientes
   getClientes(): Observable<Cliente[]> {
-    return this.http.get<Cliente[]>(`${this.apiUrl}/client-service`);
+    return this.http.get<Cliente[]>(`${this.apiUrl}/client-service/clients`, { withCredentials: true });
   }
 
-  getCliente(id: number): Observable<Cliente> {
-    return this.http.get<Cliente>(`${this.apiUrl}/client-service/${id}`);
+  getCliente(nombre: string): Observable<Cliente> {
+    return this.http.get<Cliente>(`${this.apiUrl}/client-service/find-by-name/${nombre}`, { withCredentials: true });
   }
 
   createCliente(cliente: Cliente): Observable<Cliente> {
-    return this.http.post<Cliente>(`${this.apiUrl}/client-service`, cliente);
+    return this.http.post<Cliente>(`${this.apiUrl}/client-service/create`, cliente, { withCredentials: true });
   }
 
   updateCliente(id: number, cliente: Cliente): Observable<Cliente> {
@@ -83,33 +87,53 @@ export class ApiService {
   }
 
   deleteCliente(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/client-service/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/client-service/delete-id/${id}`, { withCredentials: true });
   }
 
   // Facturas
   getFacturas(): Observable<Factura[]> {
-    return this.http.get<Factura[]>(`${this.apiUrl}/facturas`);
+    return this.http.get<Factura[]>(`${this.apiUrl}/invoice-service/invoices`, { withCredentials: true });
   }
 
+  getFacturasByCliente(nombre: string): Observable<Factura[]> {
+    return this.http.get<Factura[]>(`${this.apiUrl}/invoice-service/client-invoices/${nombre}`, {
+      withCredentials: true
+    });
+  }
+
+  getFacturasByUsuario(nombre: string): Observable<Factura[]> {
+    return this.http.get<Factura[]>(`${this.apiUrl}/invoice-service/user-invoices/${nombre}`, {
+      withCredentials: true
+    });
+  }
+
+
   getFactura(id: number): Observable<Factura> {
-    return this.http.get<Factura>(`${this.apiUrl}/facturas/${id}`);
+    return this.http.get<Factura>(`${this.apiUrl}/invoice-service/${id}`, { withCredentials: true });
   }
 
   createFactura(factura: Factura): Observable<Factura> {
-    return this.http.post<Factura>(`${this.apiUrl}/facturas`, factura);
+    return this.http.post<Factura>(`${this.apiUrl}/invoice-service/create`, factura, { withCredentials: true });
   }
 
   updateFactura(id: number, factura: Factura): Observable<Factura> {
-    return this.http.put<Factura>(`${this.apiUrl}/facturas/${id}`, factura);
+    return this.http.put<Factura>(`${this.apiUrl}/invoice-service/${id}`, factura);
   }
 
   deleteFactura(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/facturas/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/invoice-service/delete/${id}`);
   }
+
+  enviarFactura(id: number): Observable<string> {
+  return this.http.post(`${this.apiUrl}/export-service/send-invoice/${id}`, {}, {
+    withCredentials: true,
+    responseType: 'text'
+  });
+}
 
   // Usuarios
   getUsuarios(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/usuarios`);
+    return this.http.get<Usuario[]>(`${this.apiUrl}/user-service/users`);
   }
 
   getUsuario(id: number): Observable<Usuario> {
@@ -128,6 +152,10 @@ export class ApiService {
     return this.http.delete<void>(`${this.apiUrl}/usuarios/${id}`);
   }
 
+  getUsuarioByUsername(username: string) {
+    return this.http.get<Usuario>(`${this.apiUrl}/user-service/find-by-username/${username}`);
+  }
+
   // Roles
   getRoles(): Observable<Rol[]> {
     return this.http.get<Rol[]>(`${this.apiUrl}/roles`);
@@ -138,7 +166,14 @@ export class ApiService {
   }
 
   //Corte de caja
-  getCorteDeCajaPorFecha(fecha: string): Observable<CorteCajaDTO[]>{
+  getCorteDeCajaPorFecha(fecha: string): Observable<CorteCajaDTO[]> {
     return this.http.get<CorteCajaDTO[]>(`${this.apiUrl}/audit-service/date/${fecha}`);
+  }
+
+  uploadProductoImage(productoId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<any>(`${this.apiUrl}/product-service/products/${productoId}/image`, formData, { withCredentials: true });
   }
 }

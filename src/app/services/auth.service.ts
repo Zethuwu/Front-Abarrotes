@@ -12,7 +12,7 @@ export class AuthService {
   private authUrl = `${this.apiUrl}/auth`;
   private isBrowser: boolean;
 
-  private currentUserSignal = signal<Usuario | null>(null);
+  public currentUserSignal = signal<Usuario | null>(null);
   public currentUser = computed(() => this.currentUserSignal());
   public isAuthenticated = computed(() => !!this.currentUserSignal());
 

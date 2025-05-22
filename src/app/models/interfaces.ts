@@ -3,8 +3,8 @@ export interface Factura {
   activa: boolean;
   fecha: Date;
   total: number;
-  cliente_id: number;
-  usuario_id: number;
+  clienteId: number;
+  usuarioId: number;
   detalles?: DetalleFactura[];
   cliente?: Cliente;
   usuario?: Usuario;
@@ -19,7 +19,7 @@ export interface Rol {
 export interface Producto {
   id: number;
   descripcion: string;
-  imagen_url: string;
+  imagenUrl: string;
   nombre: string;
   precio: number;
   proveedorId: number;
@@ -53,9 +53,9 @@ export interface Proveedor {
 export interface DetalleFactura {
   id: number;
   cantidad: number;
-  precio_unitario: number;
-  factura_id: number;
-  producto_id: number;
+  precioUnitario: number;
+  facturaId: number;
+  productoId: number;
   producto?: Producto;
   factura?: Factura;
 }

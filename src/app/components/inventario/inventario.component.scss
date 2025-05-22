@@ -7,12 +7,21 @@
   background-color: #f9fafb;
 }
 
+/* Encabezado con botón a la derecha */
+.inventario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 /* Título */
 .page-title {
   font-size: 1.8rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
   color: #222;
+  margin: 0;
 }
 
 /* Botón de acción */
@@ -136,4 +145,150 @@ tbody tr:hover {
 
 .btn-save:hover {
   background-color: #16a34a;
+}
+
+/* --- MODAL DE SOLICITUD DE PRODUCTOS --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: rgba(31, 41, 55, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-container {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  padding: 0;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+
+  h2 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin: 0;
+  }
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+
+  &:hover {
+    color: #1f2937;
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.solicitud-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  .form-control {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  button.btn-danger {
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  background: #fff;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Botones reutilizados */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  color: #fff;
+}
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: #fff;
+}
+.btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+.btn-danger {
+  background-color: #dc2626;
+  color: #fff;
+}
+.btn-danger:hover {
+  background-color: #b91c1c;
+}
+
+.btn-sm {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .modal-container {
+    padding: 0.5rem;
+  }
+  .modal-header, .modal-body {
+    padding: 1rem;
+  }
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

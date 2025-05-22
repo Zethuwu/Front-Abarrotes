@@ -1,5 +1,8 @@
 <div class="page-container">
-  <h1 class="page-title">Inventario de Productos</h1>
+  <div class="inventario-header">
+    <h1 class="page-title">Inventario de Productos</h1>
+    <button class="btn btn-primary" (click)="openSolicitudModal()">Solicitar productos</button>
+  </div>
 
   <div class="table-container">
     <table>
@@ -36,6 +39,34 @@
         <div class="modal-actions">
           <button type="submit" class="btn-save">Guardar</button>
         </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showSolicitudModal()">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>Solicitar productos</h2>
+        <button class="btn-close" (click)="closeSolicitudModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="solicitudForm" (ngSubmit)="enviarSolicitud()">
+          <div formArrayName="productos">
+            <div *ngFor="let grupo of productosArray().controls; let i = index" [formGroupName]="i" class="solicitud-row">
+              <select formControlName="productoId" class="form-control" required>
+                <option [ngValue]="null">Seleccione un producto</option>
+                <option *ngFor="let prod of productos()" [value]="prod.id">{{ prod.nombre }}</option>
+              </select>
+              <input type="number" formControlName="cantidadRequerida" class="form-control" min="1" placeholder="Cantidad" required>
+              <button type="button" class="btn btn-danger btn-sm" (click)="removeProducto(i)">Eliminar</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-secondary" (click)="addProducto()">Agregar producto</button>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeSolicitudModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="solicitudForm.invalid">Enviar solicitud</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>

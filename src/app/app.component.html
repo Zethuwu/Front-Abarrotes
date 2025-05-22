@@ -14,7 +14,9 @@
         @if (authService.isAdmin()) {
           <a routerLink="/productos" routerLinkActive="active">Productos</a>
         }
+        @if (authService.isAdmin()) {
         <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
+        }
         @if (authService.isAdmin()) {
         <a routerLink="/proveedores" routerLinkActive="active">Proveedores</a>
         }

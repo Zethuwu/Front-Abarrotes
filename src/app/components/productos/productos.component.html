@@ -27,7 +27,9 @@
         @for (producto of productos(); track producto.id) {
           <div class="producto-card">
             <div class="producto-imagen">
-              <img [src]="producto.imagen_url || 'assets/placeholder.png'" [alt]="producto.nombre">
+              <!-- Aquí está el cambio principal para las imágenes -->
+              <img [src]="producto.imagenUrl ? ('http://localhost:8081' + producto.imagenUrl) : 'assets/placeholder.jpg'"
+                   [alt]="producto.nombre">
             </div>
             <div class="producto-info">
               <h3>{{ producto.nombre }}</h3>
@@ -104,13 +106,28 @@
             </div>
 
             <div class="form-group">
-              <label for="imagen_url">URL de Imagen</label>
+              <label for="imagen">Imagen del Producto</label>
               <input
-                type="text"
-                id="imagen_url"
-                formControlName="imagen_url"
+                type="file"
+                id="imagen"
                 class="form-control"
+                (change)="onFileSelected($event)"
+                accept="image/*"
               >
+              @if (selectedFile()) {
+                <div class="selected-file mt-2">
+                  <span>Archivo seleccionado: {{ selectedFile()?.name }}</span>
+                </div>
+              }
+              @if (editingProducto() && editingProducto()?.imagenUrl) {
+                <div class="current-image mt-2">
+                  <p>Imagen actual: {{ getImageName(editingProducto()?.imagenUrl) }}</p>
+                  <!-- Vista previa de la imagen actual -->
+                  <img [src]="'http://localhost:8081' + editingProducto()?.imagenUrl"
+                       alt="Vista previa"
+                       (error)="handleImageError($event)">
+                </div>
+              }
             </div>
 
             <div class="form-group">
@@ -126,7 +143,7 @@
                   <option [value]="proveedor.id">{{ proveedor.nombre }}</option>
                 }
               </select>
-              @if (productoForm.get('proveedor_id')?.invalid && productoForm.get('proveedor_id')?.touched) {
+              @if (productoForm.get('proveedorId')?.invalid && productoForm.get('proveedorId')?.touched) {
                 <div class="invalid-feedback">
                   Debe seleccionar un proveedor
                 </div>
@@ -134,11 +151,6 @@
             </div>
 
             <div formGroupName="inventarioDTO">
-              <div class="form-group">
-                <label for="cantidadActual">Cantidad Actual</label>
-                <input type="number" id="cantidadActual" formControlName="cantidadActual" class="form-control">
-              </div>
-
               <div class="form-group">
                 <label for="cantidadInicial">Cantidad Inicial</label>
                 <input type="number" id="cantidadInicial" formControlName="cantidadInicial" class="form-control">
