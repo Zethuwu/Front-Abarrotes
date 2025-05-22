@@ -27,7 +27,6 @@
         <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Apellido</th>
               <th>Email</th>
@@ -37,15 +36,16 @@
           <tbody>
             @for (cliente of clientes(); track cliente.id) {
               <tr>
-                <td>{{ cliente.id }}</td>
                 <td>{{ cliente.nombre }}</td>
                 <td>{{ cliente.apellido }}</td>
                 <td>{{ cliente.email }}</td>
                 <td>
+                  @if (authService.isAdmin()) {
                   <div class="btn-group">
                     <button class="btn btn-sm btn-outline" (click)="openForm(cliente)">Editar</button>
                     <button class="btn btn-sm btn-danger" (click)="deleteCliente(cliente.id)">Eliminar</button>
                   </div>
+                }
                 </td>
               </tr>
             }

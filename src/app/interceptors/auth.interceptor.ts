@@ -34,14 +34,7 @@ export class AuthInterceptor implements HttpInterceptor {
           // No manejar errores 401 en endpoints de login
           if (!request.url.includes('/auth/login')) {
             // Limpiar estado de autenticación y redirigir a login
-            this.authService.getUserInfo().subscribe({
-              error: () => {
-                // Solo redirigir si hay error en userInfo (sesión expirada)
-                this.router.navigate(['/login'], {
-                  queryParams: { returnUrl: this.router.url }
-                });
-              }
-            });
+
           }
         }
 

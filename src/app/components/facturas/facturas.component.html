@@ -8,311 +8,265 @@
     <div class="form-group col-md-4">
       <label for="buscadorCliente">Buscar por Cliente</label>
       <div class="d-flex" style="gap: 0.5rem;">
-        <input
-          id="buscadorCliente"
-          type="text"
-          class="form-control"
-          [(ngModel)]="busquedaCliente"
-          (keyup.enter)="buscarFacturasPorCliente()"
-          placeholder="Nombre del cliente"
-          autocomplete="off"
-        >
+        <input id="buscadorCliente" type="text" class="form-control" [(ngModel)]="busquedaCliente"
+          (keyup.enter)="buscarFacturasPorCliente()" placeholder="Nombre del cliente" autocomplete="off">
         <button class="btn btn-sm btn-primary" (click)="buscarFacturasPorCliente()">Buscar</button>
       </div>
     </div>
     <div class="form-group col-md-4">
       <label for="buscadorUsuario">Buscar por Usuario</label>
       <div class="d-flex" style="gap: 0.5rem;">
-        <input
-          id="buscadorUsuario"
-          type="text"
-          class="form-control"
-          [(ngModel)]="busquedaUsuario"
-          (keyup.enter)="buscarFacturasPorUsuario()"
-          placeholder="Nombre de usuario"
-          autocomplete="off"
-        >
+        <input id="buscadorUsuario" type="text" class="form-control" [(ngModel)]="busquedaUsuario"
+          (keyup.enter)="buscarFacturasPorUsuario()" placeholder="Nombre de usuario" autocomplete="off">
         <button class="btn btn-sm btn-primary" (click)="buscarFacturasPorUsuario()">Buscar</button>
       </div>
-    </div>
-    <div class="form-group col-md-4 d-flex align-items-end">
-      <button class="btn btn-secondary" (click)="resetFiltros()">Ver todas</button>
     </div>
   </div>
 
   @if (error()) {
-    <div class="alert alert-danger">
-      {{ error() }}
-    </div>
+  <div class="alert alert-danger">
+    {{ error() }}
+  </div>
   }
 
   @if (loading()) {
-    <div class="loading-spinner">
-      <div class="spinner-border"></div>
-      <p>Cargando facturas...</p>
-    </div>
+  <div class="loading-spinner">
+    <div class="spinner-border"></div>
+    <p>Cargando facturas...</p>
+  </div>
   }
 
   @if (!loading()) {
-    @if (facturas().length === 0) {
-      <div class="alert alert-info">
-        No hay facturas registradas. Crea una nueva haciendo clic en "Nueva Factura".
-      </div>
-    } @else {
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Usuario</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (factura of facturas(); track factura.id) {
-              <tr>
-                <td>{{ formatDate(factura.fecha) }}</td>
-                <td>{{ getClienteNombre(factura.clienteId) }}</td>
-                <td>{{ getUsuarioNombre(factura.usuarioId) }}</td>
-                <td>${{ factura.total.toFixed(2) }}</td>
-                <td>
-                  @if (factura.activa) {
-                    <span class="badge badge-success">Activa</span>
-                  } @else {
-                    <span class="badge badge-secondary">Inactiva</span>
-                  }
-                </td>
-                <td>
-                  <div class="btn-group">
-                    <button class="btn btn-sm btn-info" (click)="viewDetalles(factura)">Ver</button>
-                    <button class="btn btn-sm btn-outline" (click)="openForm(factura)">Editar</button>
-                    <button class="btn btn-sm btn-danger" (click)="deleteFactura(factura.id)">Eliminar</button>
-                  </div>
-                </td>
-              </tr>
+  @if (facturas().length === 0) {
+  <div class="alert alert-info">
+    No hay facturas registradas. Crea una nueva haciendo clic en "Nueva Factura".
+  </div>
+  } @else {
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Usuario</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (factura of facturas(); track factura.id) {
+        <tr>
+          <td>{{ formatDate(factura.fecha) }}</td>
+          <td>{{ getClienteNombre(factura.clienteId) }}</td>
+          <td>{{ getUsuarioNombre(factura.usuarioId) }}</td>
+          <td>
+            ${{ (factura.total ?? 0).toFixed(2) }}
+          </td>
+          <td>
+            @if (!factura.activa) {
+            <span class="badge badge-success">Activa</span>
+            } @else {
+            <span class="badge badge-secondary">Cancelada</span>
             }
-          </tbody>
-        </table>
-      </div>
-    }
+          </td>
+          <td>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-info" (click)="viewDetalles(factura)">Ver</button>
+              <button class="btn btn-sm btn-danger" (click)="cancelarFacturaVisual(factura)">Cancelar</button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
   }
 
   <!-- Modal de formulario -->
   @if (showForm()) {
-    <div class="modal-overlay">
-      <div class="modal-container modal-lg">
-        <div class="modal-header">
-          <h2>{{ editingFactura() ? 'Editar Factura' : 'Nueva Factura' }}</h2>
-          <button class="btn-close" (click)="closeForm()">&times;</button>
-        </div>
+  <div class="modal-overlay">
+    <div class="modal-container modal-lg">
+      <div class="modal-header">
+        <h2>{{ editingFactura() ? 'Editar Factura' : 'Nueva Factura' }}</h2>
+        <button class="btn-close" (click)="closeForm()">&times;</button>
+      </div>
 
-        <div class="modal-body">
-          <form [formGroup]="facturaForm" (ngSubmit)="onSubmit()">
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label for="cliente">Cliente</label>
-                <select
-                  id="cliente"
-                  class="form-control"
-                  formControlName="clienteId"
-                  required
-                >
-                  <option [ngValue]="null">Seleccione un cliente</option>
-                  <option *ngFor="let cliente of clientes()" [value]="cliente.id">{{ cliente.nombre }}</option>
-                </select>
-              </div>
-
-              <div class="form-group col-md-6">
-                <label for="usuarioId">Usuario</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  [value]="getUsuarioNombre(facturaForm.get('usuarioId')?.value || 0)"
-                  readonly
-                >
-                <input type="hidden" formControlName="usuarioId">
-              </div>
+      <div class="modal-body">
+        <form [formGroup]="facturaForm" (ngSubmit)="onSubmit()">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="cliente">Cliente</label>
+              <select id="cliente" class="form-control" formControlName="clienteId" required>
+                <option [ngValue]="null">Seleccione un cliente</option>
+                <option *ngFor="let cliente of clientes()" [value]="cliente.id">{{ cliente.nombre }}</option>
+              </select>
             </div>
 
-            <div class="detalles-section">
-              <div class="detalles-header">
-                <h3>Detalles de la Factura</h3>
-                <button type="button" class="btn btn-sm btn-outline" (click)="addDetalle()">
-                  Añadir Producto
-                </button>
-              </div>
-
-              <div formArrayName="detalles">
-                @for (detalle of detallesArray.controls; track $index) {
-                  <div [formGroupName]="$index" class="detalle-item">
-                    <div class="form-row">
-                      <div class="form-group col-md-5">
-                        <label>Producto</label>
-                        <select
-                          formControlName="productoId"
-                          class="form-control"
-                          [class.is-invalid]="detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched"
-                          (change)="updatePrecioUnitario($index)"
-                        >
-                          <option [ngValue]="null">Seleccione un producto</option>
-                          @for (producto of productos(); track producto.id) {
-                            <option [value]="producto.id">{{ producto.nombre }} - ${{ producto.precio.toFixed(2) }}</option>
-                          }
-                        </select>
-                        @if (detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched) {
-                          <div class="invalid-feedback">
-                            Debe seleccionar un producto
-                          </div>
-                        }
-                      </div>
-
-                      <div class="form-group col-md-3">
-                        <label>Cantidad</label>
-                        <input
-                          type="number"
-                          formControlName="cantidad"
-                          class="form-control"
-                          [class.is-invalid]="detalle.get('cantidad')?.invalid && detalle.get('cantidad')?.touched"
-                          min="1"
-                        >
-                        @if (detalle.get('cantidad')?.invalid && detalle.get('cantidad')?.touched) {
-                          <div class="invalid-feedback">
-                            La cantidad debe ser mayor a 0
-                          </div>
-                        }
-                      </div>
-
-                      <div class="form-group col-md-3">
-                        <label>Precio Unitario</label>
-                        <input
-                          type="number"
-                          formControlName="precioUnitario"
-                          class="form-control"
-                          [class.is-invalid]="detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched"
-                          step="0.01"
-                          min="0"
-                        >
-                        @if (detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched) {
-                          <div class="invalid-feedback">
-                            El precio debe ser mayor o igual a 0
-                          </div>
-                        }
-                      </div>
-
-                      <div class="form-group col-md-1 d-flex align-items-end">
-                        <button
-                          type="button"
-                          class="btn btn-sm btn-danger"
-                          (click)="removeDetalle($index)"
-                          [disabled]="detallesArray.length <= 1"
-                        >
-                          &times;
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-
-              <div class="total-section">
-                <h4>Total: ${{ calcularTotal().toFixed(2) }}</h4>
-              </div>
+            <div class="form-group col-md-6">
+              <label for="usuarioId">Usuario</label>
+              <input type="text" class="form-control"
+                [value]="getUsuarioNombre(facturaForm.get('usuarioId')?.value || 0)" readonly>
+              <input type="hidden" formControlName="usuarioId">
             </div>
+          </div>
 
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
-              <button
-                type="submit"
-                class="btn btn-primary"
-                [disabled]="facturaForm.invalid"
-              >
-                {{ editingFactura() ? 'Actualizar' : 'Crear' }}
+          <div class="detalles-section">
+            <div class="detalles-header">
+              <h3>Detalles de la Factura</h3>
+              <button type="button" class="btn btn-sm btn-outline" (click)="addDetalle()">
+                Añadir Producto
               </button>
             </div>
-          </form>
-        </div>
+
+            <div formArrayName="detalles">
+              @for (detalle of detallesArray.controls; track $index) {
+              <div [formGroupName]="$index" class="detalle-item">
+                <div class="form-row">
+                  <div class="form-group col-md-5">
+                    <label>Producto</label>
+                    <select formControlName="productoId" class="form-control"
+                      [class.is-invalid]="detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched"
+                      (change)="updatePrecioUnitario($index)">
+                      <option [ngValue]="null">Seleccione un producto</option>
+                      @for (producto of productos(); track producto.id) {
+                      <option [value]="producto.id">{{ producto.nombre }} - ${{ producto.precio.toFixed(2) }}</option>
+                      }
+                    </select>
+                    @if (detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched) {
+                    <div class="invalid-feedback">
+                      Debe seleccionar un producto
+                    </div>
+                    }
+                  </div>
+
+                  <div class="form-group col-md-3">
+                    <label>Cantidad</label>
+                    <input type="number" formControlName="cantidad" class="form-control"
+                      [class.is-invalid]="detalle.get('cantidad')?.invalid && detalle.get('cantidad')?.touched" min="1">
+                    @if (detalle.get('cantidad')?.invalid && detalle.get('cantidad')?.touched) {
+                    <div class="invalid-feedback">
+                      La cantidad debe ser mayor a 0
+                    </div>
+                    }
+                  </div>
+
+                  <div class="form-group col-md-3">
+                    <label>Precio Unitario</label>
+                    <input type="number" formControlName="precioUnitario" class="form-control"
+                      [class.is-invalid]="detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched"
+                      step="0.01" min="0">
+                    @if (detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched) {
+                    <div class="invalid-feedback">
+                      El precio debe ser mayor o igual a 0
+                    </div>
+                    }
+                  </div>
+
+                  <div class="form-group col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-sm btn-danger" (click)="removeDetalle($index)"
+                      [disabled]="detallesArray.length <= 1">
+                      &times;
+                    </button>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+
+            <div class="total-section">
+              <h4>Total: ${{ calcularTotal().toFixed(2) }}</h4>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="facturaForm.invalid">
+              {{ editingFactura() ? 'Actualizar' : 'Crear' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
+  </div>
   }
 
   <!-- Modal de detalles -->
   @if (showDetalles() !== null && selectedFactura()) {
-    <div class="modal-overlay">
-      <div class="modal-container modal-lg">
-        <div class="modal-header">
-          <h2>Detalles de Factura #{{ selectedFactura()?.id }}</h2>
-          <button class="btn-close" (click)="closeDetalles()">&times;</button>
+  <div class="modal-overlay">
+    <div class="modal-container modal-lg">
+      <div class="modal-header">
+        <h2>Detalles de Factura #{{ selectedFactura()?.id }}</h2>
+        <button class="btn-close" (click)="closeDetalles()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="factura-info">
+          <div class="factura-header">
+            <div class="factura-title">
+              <h3>Abarrotes el Zorro</h3>
+              <p>Factura #{{ selectedFactura()?.id }}</p>
+              <p>Fecha: {{ fechaFacturaSeleccionada }}</p>
+            </div>
+
+            <div class="factura-cliente">
+              <h4>Cliente</h4>
+              <p>{{ getClienteNombre(selectedFactura()?.clienteId || 0) }}</p>
+            </div>
+          </div>
+
+          <div class="factura-detalles">
+            <h4>Productos</h4>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (selectedFactura()?.detalles && selectedFactura()?.detalles?.length) {
+                  @for (detalle of selectedFactura()?.detalles || []; track detalle.id) {
+                  <tr>
+                    <td>{{ getProductoNombre(detalle.productoId) }}</td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>${{ detalle.precioUnitario.toFixed(2) }}</td>
+                    <td>${{ (detalle.cantidad * detalle.precioUnitario).toFixed(2) }}</td>
+                  </tr>
+                  }
+                  } @else {
+                  <tr>
+                    <td colspan="4" class="text-center">No hay detalles disponibles</td>
+                  </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" class="text-right"><strong>Total:</strong></td>
+                    <td><strong>${{ totalFacturaSeleccionada }}</strong></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <div class="factura-footer">
+            <p>Atendido por: {{ getUsuarioNombre(selectedFactura()?.usuarioId || 0) }}</p>
+            <p>¡Gracias por su compra!</p>
+          </div>
         </div>
 
-        <div class="modal-body">
-          <div class="factura-info">
-            <div class="factura-header">
-              <div class="factura-title">
-                <h3>Abarrotes el Zorro</h3>
-                <p>Factura #{{ selectedFactura()?.id }}</p>
-                <p>Fecha: {{ fechaFacturaSeleccionada }}</p>
-              </div>
-
-              <div class="factura-cliente">
-                <h4>Cliente</h4>
-                <p>{{ getClienteNombre(selectedFactura()?.clienteId || 0) }}</p>
-              </div>
-            </div>
-
-            <div class="factura-detalles">
-              <h4>Productos</h4>
-
-              <div class="table-responsive">
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Precio Unitario</th>
-                      <th>Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @if (selectedFactura()?.detalles && selectedFactura()?.detalles?.length) {
-                      @for (detalle of selectedFactura()?.detalles || []; track detalle.id) {
-                        <tr>
-                          <td>{{ getProductoNombre(detalle.productoId) }}</td>
-                          <td>{{ detalle.cantidad }}</td>
-                          <td>${{ detalle.precioUnitario.toFixed(2) }}</td>
-                          <td>${{ (detalle.cantidad * detalle.precioUnitario).toFixed(2) }}</td>
-                        </tr>
-                      }
-                    } @else {
-                      <tr>
-                        <td colspan="4" class="text-center">No hay detalles disponibles</td>
-                      </tr>
-                    }
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colspan="3" class="text-right"><strong>Total:</strong></td>
-                      <td><strong>${{ totalFacturaSeleccionada }}</strong></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-
-            <div class="factura-footer">
-              <p>Atendido por: {{ getUsuarioNombre(selectedFactura()?.usuarioId || 0) }}</p>
-              <p>¡Gracias por su compra!</p>
-            </div>
-          </div>
-
-          <div class="factura-actions">
-            <button type="button" class="btn btn-secondary" (click)="closeDetalles()">Cerrar</button>
-            <button type="button" class="btn btn-primary" (click)="imprimirFactura()">Imprimir</button>
-          </div>
+        <div class="factura-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeDetalles()">Cerrar</button>
+          <button type="button" class="btn btn-primary" (click)="imprimirFactura()">Imprimir</button>
         </div>
       </div>
     </div>
+  </div>
   }
 </div>

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { Cliente } from '../../models/interfaces';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-clientes',
@@ -22,7 +23,8 @@ export class ClientesComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    public authService : AuthService
   ) {
     this.clienteForm = this.fb.group({
       nombre: ['', [Validators.required]],

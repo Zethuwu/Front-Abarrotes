@@ -62,11 +62,11 @@ export class ApiService {
   }
 
   updateProveedor(id: number, proveedor: Proveedor): Observable<Proveedor> {
-    return this.http.put<Proveedor>(`${this.apiUrl}/supplier-service/update/${id}`, proveedor);
+    return this.http.put<Proveedor>(`${this.apiUrl}/supplier-service/update/${id}`, proveedor, { withCredentials: true });
   }
 
   deleteProveedor(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/supplier-service/delete/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/supplier-service/delete/${id}`, { withCredentials: true });
   }
 
   // Clientes
@@ -83,7 +83,7 @@ export class ApiService {
   }
 
   updateCliente(id: number, cliente: Cliente): Observable<Cliente> {
-    return this.http.put<Cliente>(`${this.apiUrl}/client-service/${id}`, cliente);
+    return this.http.put<Cliente>(`${this.apiUrl}/client-service/update/${id}`, cliente, { withCredentials: true });
   }
 
   deleteCliente(id: number): Observable<void> {
@@ -91,9 +91,6 @@ export class ApiService {
   }
 
   // Facturas
-  getFacturas(): Observable<Factura[]> {
-    return this.http.get<Factura[]>(`${this.apiUrl}/invoice-service/invoices`, { withCredentials: true });
-  }
 
   getFacturasByCliente(nombre: string): Observable<Factura[]> {
     return this.http.get<Factura[]>(`${this.apiUrl}/invoice-service/client-invoices/${nombre}`, {
@@ -137,19 +134,19 @@ export class ApiService {
   }
 
   getUsuario(id: number): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/usuarios/${id}`);
+    return this.http.get<Usuario>(`${this.apiUrl}/user-service/${id}`);
   }
 
   createUsuario(usuario: Usuario): Observable<Usuario> {
-    return this.http.post<Usuario>(`${this.apiUrl}/usuarios`, usuario);
+    return this.http.post<Usuario>(`${this.apiUrl}/user-service/create`, usuario);
   }
 
   updateUsuario(id: number, usuario: Usuario): Observable<Usuario> {
-    return this.http.put<Usuario>(`${this.apiUrl}/usuarios/${id}`, usuario);
+    return this.http.put<Usuario>(`${this.apiUrl}/user-service/update/${id}`, usuario, { withCredentials: true });
   }
 
   deleteUsuario(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/usuarios/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/user-service/delete-id/${id}`);
   }
 
   getUsuarioByUsername(username: string) {
@@ -158,7 +155,7 @@ export class ApiService {
 
   // Roles
   getRoles(): Observable<Rol[]> {
-    return this.http.get<Rol[]>(`${this.apiUrl}/roles`);
+    return this.http.get<Rol[]>(`${this.apiUrl}/role-service/roles`, { withCredentials: true });
   }
 
   createInventario(inventario: InventarioDTO): Observable<InventarioDTO> {

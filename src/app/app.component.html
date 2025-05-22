@@ -1,36 +1,38 @@
 <div class="app-container">
   <!-- Navbar - Solo se muestra si está autenticado y no está en la página de login -->
   @if (authService.isAuthenticated() && authService.currentUser()?.roles && currentRoute !== '/login') {
-    <nav class="navbar">
-      <div class="navbar-brand">
-        <a routerLink="/dashboard">
-          <span class="brand-icon">🦊</span>
-          Abarrotes el Zorro
-        </a>
-      </div>
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a routerLink="/dashboard">
+        <span class="brand-icon">🦊</span>
+        Abarrotes el Zorro
+      </a>
+    </div>
 
-      <div class="navbar-menu">
-        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-        @if (authService.isAdmin()) {
-          <a routerLink="/productos" routerLinkActive="active">Productos</a>
-        }
-        @if (authService.isAdmin()) {
-        <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
-        }
-        @if (authService.isAdmin()) {
-        <a routerLink="/proveedores" routerLinkActive="active">Proveedores</a>
-        }
-        <a routerLink="/clientes" routerLinkActive="active">Clientes</a>
-        <a routerLink="/facturas" routerLinkActive="active">Facturas</a>
-        <a routerLink="/corte-caja" routerLinkActive="active">Corte de Caja</a>
-      </div>
+    <div class="navbar-menu">
+      @if (authService.isAdmin()) {
+      <a routerLink="/dashboard" routerLinkActive="active">Usuarios</a>
+      }
+      @if (authService.isAdmin()) {
+      <a routerLink="/productos" routerLinkActive="active">Productos</a>
+      }
+      @if (authService.isAdmin()) {
+      <a routerLink="/inventario" routerLinkActive="active">Inventario</a>
+      }
+      @if (authService.isAdmin()) {
+      <a routerLink="/proveedores" routerLinkActive="active">Proveedores</a>
+      }
+      <a routerLink="/clientes" routerLinkActive="active">Clientes</a>
+      <a routerLink="/facturas" routerLinkActive="active">Facturas</a>
+      <a routerLink="/corte-caja" routerLinkActive="active">Corte de Caja</a>
+    </div>
 
-      <div class="navbar-end">
-        <button class="btn btn-outline" (click)="logout()">
-          Cerrar Sesión
-        </button>
-      </div>
-    </nav>
+    <div class="navbar-end">
+      <button class="btn btn-outline" (click)="logout()">
+        Cerrar Sesión
+      </button>
+    </div>
+  </nav>
   }
 
   <!-- Contenido principal -->

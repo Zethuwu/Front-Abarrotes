@@ -1,59 +1,138 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 import { ApiService } from '../../services/api.service';
-import { Producto, InventarioDTO } from '../../models/interfaces';
+import { Producto, InventarioDTO, Usuario } from '../../models/interfaces';
 import { RouterModule } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms'; // <-- Agrega esto
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: 'dashboard.component.html',
   styleUrls: ['dashboard.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [
+    CommonModule,
+    RouterModule,
+    ReactiveFormsModule // <-- Y esto
+  ]
 })
 export class DashboardComponent implements OnInit {
   // Usando signals para el estado
+  editingUsuario: Usuario | null = null;
   productos = signal<Producto[]>([]);
   inventarioBajo = signal<InventarioDTO[]>([]);
+  usuarios = signal<Usuario[]>([]);
+  rolesDisponibles = signal<{ id: number, nombre: string }[]>([]);
   loading = signal(true);
   error = signal('');
+  showCrearUsuario = signal(false);
+  usuarioForm = new FormGroup({
+    nombre: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    username: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    roles: new FormControl<number[]>([], { nonNullable: true, validators: [Validators.required] })
+  });
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService,
+    public authService: AuthService
+  ) { }
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadUsuarios();
+    this.loadRoles();
   }
 
-  loadData(): void {
+
+  loadUsuarios(): void {
     this.loading.set(true);
-
-    // Obtener productos
-    this.apiService.getProductos().subscribe({
-      next: (productos) => {
-        this.productos.set(productos);
+    this.apiService.getUsuarios().subscribe({
+      next: (usuarios) => {
+        this.usuarios.set(usuarios);
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Error al cargar los productos');
-        console.error('Error loading productos', err);
+        this.error.set('Error al cargar los usuarios');
         this.loading.set(false);
       }
     });
-
-    // Obtener inventario bajo
-    /*
-    this.apiService.getInventario().subscribe({
-      next: (inventario) => {
-        // Filtrar productos con inventario bajo
-        this.inventarioBajo.set(
-          inventario.filter(item => item.cantidad_actual <= item.minimo_requerido)
-        );
-      },
-      error: (err) => {
-        console.error('Error loading inventario', err);
-      }
-    });
-    */
   }
+
+  loadRoles(): void {
+    this.apiService.getRoles().subscribe({
+      next: (roles) => this.rolesDisponibles.set(roles),
+      error: () => this.rolesDisponibles.set([])
+    });
+  }
+
+  openCrearUsuario(): void {
+    this.usuarioForm.reset();
+    this.showCrearUsuario.set(true);
+  }
+
+  closeCrearUsuario(): void {
+    this.showCrearUsuario.set(false);
+  }
+
+  crearUsuario(): void {
+  const usuarioFormValue = this.usuarioForm.value;
+  const rolesArray = usuarioFormValue.roles ?? [];
+  const usuarioParaGuardar = {
+    nombre: usuarioFormValue.nombre ?? '',
+    username: usuarioFormValue.username ?? '',
+    password: usuarioFormValue.password ?? '',
+    roles: rolesArray.map((id: number) => ({ id }))
+  };
+
+  if (this.editingUsuario && this.editingUsuario.id !== undefined) {
+    // Actualizar usuario existente
+    this.apiService.updateUsuario(this.editingUsuario.id, usuarioParaGuardar).subscribe({
+      next: () => {
+        this.loadUsuarios();
+        this.closeCrearUsuario();
+        this.editingUsuario = null;
+      },
+      error: () => alert('Error al actualizar usuario')
+    });
+  } else {
+    // Crear usuario nuevo
+    this.apiService.createUsuario(usuarioParaGuardar).subscribe({
+      next: () => {
+        this.loadUsuarios();
+        this.closeCrearUsuario();
+      },
+      error: () => alert('Error al crear usuario')
+    });
+  }
+}
+
+  getRolesLegibles(roles: any[]): string {
+    return roles
+      ?.map(r => typeof r === 'string'
+        ? r.replace('ROLE_', '')
+        : (r.nombre ? r.nombre.replace('ROLE_', '') : '')
+      )
+      .join(', ') || '';
+  }
+  getInitials(name: string): string {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  getRoleLegible(rol: string): string {
+    return rol.replace('ROLE_', '');
+  }
+
+  openEditarUsuario(usuario: Usuario): void {
+  this.usuarioForm.reset();
+  this.usuarioForm.patchValue({
+    nombre: usuario.nombre,
+    username: usuario.username,
+    password: '', // Deja vacío o pide que se cambie solo si se desea
+    roles: usuario.roles.map((rol: any) => typeof rol === 'string' ? null : rol.id).filter(id => id !== null)
+  });
+  this.editingUsuario = usuario; // Crea una variable para saber si estás editando
+  this.showCrearUsuario.set(true);
+}
 }

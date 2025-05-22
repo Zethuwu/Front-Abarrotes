@@ -1,82 +1,136 @@
-<div class="dashboard-container">
-  <h1>Dashboard - Abarrotes el Zorro</h1>
+<div class="usuarios-container">
+  <div class="usuarios-header">
+    <h1>Usuarios</h1>
+    <button class="btn btn-primary" (click)="openCrearUsuario()">Nuevo Usuario</button>
+  </div>
 
   @if (error()) {
-    <div class="alert alert-danger">
-      {{ error() }}
-    </div>
+  <div class="alert alert-danger">
+    {{ error() }}
+  </div>
   }
 
-  @if (loading()) {
-    <div class="loading-spinner">
-      <div class="spinner-border"></div>
-      <p>Cargando datos...</p>
-    </div>
-  }
-
-  @if (!loading()) {
-    <div class="dashboard-grid">
-      <!-- Resumen de Inventario -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <h2>Inventario Bajo</h2>
-        </div>
-        <div class="card-body">
-          @if (inventarioBajo().length > 0) {
-            <div class="alert alert-warning">
-              Hay {{ inventarioBajo().length }} productos con inventario bajo
-            </div>
-
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Actual</th>
-                  <th>Mínimo</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (item of inventarioBajo(); track item.id) {
-                  <tr>
-                    <td>{{ item.cantidadActual }}</td>
-                    <td>{{ item.minimoRequerido }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          } @else {
-            <div class="alert alert-success">
-              Todos los productos tienen inventario suficiente
-            </div>
+ @if (!loading()) {
+  @if (usuarios().length === 0) {
+  <div class="alert alert-info">
+    No hay usuarios registrados. Crea uno nuevo haciendo clic en "Nuevo Usuario".
+  </div>
+  } @else {
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Username</th>
+          <th>Roles</th>
+          @if (authService.isAdmin()) {
+          <th>Acciones</th>
           }
-        </div>
+        </tr>
+      </thead>
+      <tbody>
+        @for (usuario of usuarios(); track usuario.id) {
+        <tr>
+          <td>
+            <div class="usuario-info-row">
+              <div class="usuario-avatar-small">
+                {{ getInitials(usuario.nombre) }}
+              </div>
+              <span class="usuario-nombre">{{ usuario.nombre }}</span>
+            </div>
+          </td>
+          <td>{{ usuario.username }}</td>
+          <td>
+            <div class="roles-container">
+              @for (rol of usuario.roles || []; track rol) {
+              <span class="role-badge">{{ getRolesLegibles([rol]) }}</span>
+              }
+            </div>
+          </td>
+          @if (authService.isAdmin()) {
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-sm btn-outline" (click)="openEditarUsuario(usuario)">Editar</button>
+            </div>
+          </td>
+          }
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+  }
+
+  <!-- Modal de formulario -->
+  @if (showCrearUsuario()) {
+  <div class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+
+        <button class="btn-close" (click)="closeCrearUsuario()">&times;</button>
       </div>
 
-      <!-- Productos Recientes -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <h2>Productos Recientes</h2>
-        </div>
-        <div class="card-body">
-          <div class="productos-grid">
-            @for (producto of productos().slice(0, 4); track producto.id) {
-              <div class="producto-card">
-                <div class="producto-imagen">
-                  <img [src]="producto.imagenUrl || 'assets/placeholder.jpg'" [alt]="producto.nombre">
-                </div>
-                <div class="producto-info">
-                  <h3>{{ producto.nombre }}</h3>
-                  <p class="producto-precio">${{ producto.precio.toFixed(2) }}</p>
-                </div>
-              </div>
+      <div class="modal-body">
+        <form [formGroup]="usuarioForm" (ngSubmit)="crearUsuario()">
+          <div class="form-group">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" formControlName="nombre" class="form-control"
+              [class.is-invalid]="usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched">
+            @if (usuarioForm.get('nombre')?.invalid && usuarioForm.get('nombre')?.touched) {
+            <div class="invalid-feedback">
+              El nombre es requerido
+            </div>
             }
           </div>
 
-          <button class="btn btn-primary" routerLink="/productos">
-            Ver todos los productos
-          </button>
-        </div>
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" formControlName="username" class="form-control"
+              [class.is-invalid]="usuarioForm.get('username')?.invalid && usuarioForm.get('username')?.touched">
+            @if (usuarioForm.get('username')?.invalid && usuarioForm.get('username')?.touched) {
+            <div class="invalid-feedback">
+              El username es requerido
+            </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" formControlName="password" class="form-control"
+              [class.is-invalid]="usuarioForm.get('password')?.invalid && usuarioForm.get('password')?.touched">
+            @if (usuarioForm.get('password')?.invalid && usuarioForm.get('password')?.touched) {
+            <div class="invalid-feedback">
+              El password es requerido
+            </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="roles">Roles</label>
+            <select id="roles" formControlName="roles" class="form-control" multiple
+              [class.is-invalid]="usuarioForm.get('roles')?.invalid && usuarioForm.get('roles')?.touched">
+              @for (rol of rolesDisponibles(); track rol.id) {
+              <option [value]="rol.id">{{ rol.nombre.replace('ROLE_', '') }}</option>
+              }
+            </select>
+            @if (usuarioForm.get('roles')?.invalid && usuarioForm.get('roles')?.touched) {
+            <div class="invalid-feedback">
+              Debe seleccionar al menos un rol
+            </div>
+            }
+            <div class="form-helper-text">
+              Mantén presionado Ctrl (Cmd en Mac) para seleccionar múltiples roles
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeCrearUsuario()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="usuarioForm.invalid">Crear</button>
+          </div>
+        </form>
       </div>
     </div>
+  </div>
   }
 </div>

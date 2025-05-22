@@ -1,3 +1,4 @@
+import { AuthService } from './../../services/auth.service';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -5,6 +6,7 @@ import { ApiService } from '../../services/api.service';
 import { Producto, Proveedor } from '../../models/interfaces';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
 
 @Component({
   selector: 'app-productos',
@@ -26,18 +28,19 @@ export class ProductosComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    public authService: AuthService
   ) {
     this.productoForm = this.fb.group({
       nombre: ['', [Validators.required]],
       descripcion: ['', [Validators.required]],
-      precio: [0, [Validators.required, Validators.min(0)]],
+      precio: [1, [Validators.required, Validators.min(1)]],
       imagenUrl: [''],
       status: ['CREADO_CORRECTAMENTE'],
       proveedorId: [null, [Validators.required]],
       inventarioDTO: this.fb.group({
-        cantidadInicial: [0, [Validators.required, Validators.min(0)]],
-        minimoRequerido: [0, [Validators.required, Validators.min(0)]]
+        cantidadInicial: [1, [Validators.required, Validators.min(1)]],
+        minimoRequerido: [1, [Validators.required, Validators.min(1)]]
       })
     });
   }
@@ -83,9 +86,9 @@ export class ProductosComponent implements OnInit {
         imagenUrl: producto.imagenUrl,
         proveedorId: producto.proveedorId,
         inventarioDTO: {
-          cantidadActual: producto.inventarioDTO?.cantidadActual ?? 0,
-          cantidadInicial: producto.inventarioDTO?.cantidadInicial ?? 0,
-          minimoRequerido: producto.inventarioDTO?.minimoRequerido ?? 0
+          cantidadActual: producto.inventarioDTO?.cantidadActual ?? 1,
+          cantidadInicial: producto.inventarioDTO?.cantidadInicial ?? 1,
+          minimoRequerido: producto.inventarioDTO?.minimoRequerido ?? 1
         }
       });
       // Limpiamos el archivo seleccionado al abrir el formulario
@@ -95,13 +98,13 @@ export class ProductosComponent implements OnInit {
       this.productoForm.reset({
         nombre: '',
         descripcion: '',
-        precio: 0,
+        precio: 1,
         imagenUrl: '',
         proveedorId: null,
         inventarioDTO: {
-          cantidadActual: 0,
-          cantidadInicial: 0,
-          minimoRequerido: 0
+          cantidadActual: 1,
+          cantidadInicial: 1,
+          minimoRequerido: 1
         }
       });
       this.selectedFile.set(null);

@@ -47,9 +47,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Obtiene información del usuario actual
-   */
   getUserInfo(): Observable<any> {
     return this.http.get<Usuario>(`${this.authUrl}/user-info`, {
       withCredentials: true // Importante: enviar cookies
@@ -58,16 +55,12 @@ export class AuthService {
         this.currentUserSignal.set(user);
       }),
       catchError(error => {
-        console.error('Error obteniendo información del usuario', error);
         this.currentUserSignal.set(null);
         return throwError(() => error);
       })
     );
   }
 
-  /**
-   * Realiza logout y elimina la sesión
-   */
   logout(): Observable<any> {
     return this.http.post(`${this.authUrl}/logout`, {}, {
       withCredentials: true
@@ -78,7 +71,6 @@ export class AuthService {
       }),
       catchError(error => {
         // En caso de error, igualmente limpiamos datos locales
-        console.error('Error en logout', error);
         this.currentUserSignal.set(null);
         this.router.navigate(['/login']);
         return of(null); // No propagamos el error

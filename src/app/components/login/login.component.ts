@@ -37,8 +37,14 @@ export class LoginComponent {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
+        if (this.authService.isAdmin()) {
         this.router.navigate(['/dashboard']);
         this.loading = false;
+        }
+        else {
+          this.router.navigate(['/facturas']);
+          this.loading = false;
+        }
       },
       error: (err) => {
         this.error = 'Usuario o contraseña incorrectos';

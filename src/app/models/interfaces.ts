@@ -36,11 +36,11 @@ export interface InventarioDTO {
 }
 
 export interface Usuario {
-  id: number;
+  id?: number;
   nombre: string;
-  password: string;
   username: string;
-  roles?:string[];
+  password: string;
+  roles: any[]; // O mejor: (string[] | { id: number }[])
 }
 
 export interface Proveedor {

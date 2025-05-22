@@ -1,9 +1,9 @@
-import { Component, OnInit, signal } from "@angular/core"
+import { ChangeDetectorRef, Component, OnInit, signal } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from "@angular/forms"
 import { ApiService } from "../../services/api.service"
 import { AuthService } from "../../services/auth.service"
-import { Factura, Cliente, Usuario, Producto } from "../../models/interfaces"
+import { Factura, Cliente, Usuario, Producto } from '../../models/interfaces';
 import { RouterModule } from "@angular/router"
 import { FormsModule } from '@angular/forms';
 
@@ -35,6 +35,7 @@ export class FacturasComponent implements OnInit {
     private apiService: ApiService,
     private authService: AuthService,
     private fb: FormBuilder,
+     private cdr: ChangeDetectorRef
   ) {
     this.facturaForm = this.fb.group({
       clienteId: [null, [Validators.required]],
@@ -53,19 +54,6 @@ export class FacturasComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true)
-
-    // Cargar facturas
-    this.apiService.getFacturas().subscribe({
-      next: (facturas) => {
-        this.facturas.set(facturas)
-        this.loading.set(false)
-      },
-      error: (err) => {
-        this.error.set("Error al cargar las facturas")
-        console.error("Error loading facturas", err)
-        this.loading.set(false)
-      },
-    })
 
     // Cargar clientes
     this.apiService.getClientes().subscribe({
@@ -376,4 +364,14 @@ export class FacturasComponent implements OnInit {
     });
   }
 
+  cancelarFacturaVisual(factura: Factura): void {
+  const actualizadas = this.facturas().map(f =>
+    f.id === factura.id
+      ? { ...f, activa: true }
+      : f
+  );
+  this.facturas.set(actualizadas);
+  console.log('Se presionó cancelar factura visual');
+  this.cdr.detectChanges();
+}
 }
