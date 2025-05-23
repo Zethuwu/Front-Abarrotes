@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { Cliente } from '../../models/interfaces';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -27,8 +27,8 @@ export class ClientesComponent implements OnInit {
     public authService : AuthService
   ) {
     this.clienteForm = this.fb.group({
-      nombre: ['', [Validators.required]],
-      apellido: ['', [Validators.required]],
+      nombre: ['', [Validators.required, soloTextoValidator]],
+      apellido: ['', [Validators.required, soloTextoValidator]],
       email: ['', [Validators.required, Validators.email]]
     });
   }
@@ -128,4 +128,13 @@ export class ClientesComponent implements OnInit {
       });
     }
   }
+}
+
+
+function soloTextoValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value;
+  if (value && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+    return { soloTexto: true };
+  }
+  return null;
 }

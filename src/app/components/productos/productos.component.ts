@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { Producto, Proveedor } from '../../models/interfaces';
 import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 
 @Component({
@@ -34,13 +34,13 @@ export class ProductosComponent implements OnInit {
     this.productoForm = this.fb.group({
       nombre: ['', [Validators.required]],
       descripcion: ['', [Validators.required]],
-      precio: [1, [Validators.required, Validators.min(1)]],
+      precio: [1, [Validators.required, Validators.min(1), this.dosDecimalesValidator]],
       imagenUrl: [''],
       status: ['CREADO_CORRECTAMENTE'],
       proveedorId: [null, [Validators.required]],
       inventarioDTO: this.fb.group({
-        cantidadInicial: [1, [Validators.required, Validators.min(1)]],
-        minimoRequerido: [1, [Validators.required, Validators.min(1)]]
+        cantidadInicial: [1, [Validators.required, Validators.min(1), this.dosDecimalesValidator]],
+        minimoRequerido: [1, [Validators.required, Validators.min(1), this.dosDecimalesValidator]],
       })
     });
   }
@@ -239,5 +239,11 @@ export class ProductosComponent implements OnInit {
         }
       });
     }
+  }
+
+  dosDecimalesValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') return null;
+    return /^\d+(\.\d{1,2})?$/.test(value) ? null : { dosDecimales: true };
   }
 }

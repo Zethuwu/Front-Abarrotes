@@ -7,6 +7,12 @@ import { Factura, Cliente, Usuario, Producto } from '../../models/interfaces';
 import { RouterModule } from "@angular/router"
 import { FormsModule } from '@angular/forms';
 
+interface ProductoAgregado {
+  productoId: number;
+  cantidad: number;
+  precioUnitario: number;
+}
+
 @Component({
   selector: "app-facturas",
   templateUrl: "./facturas.component.html",
@@ -31,11 +37,17 @@ export class FacturasComponent implements OnInit {
   busquedaCliente = '';
   busquedaUsuario = '';
 
+  // Nuevas propiedades para el sistema de agregar productos
+  selectedProductoId: number | null = null;
+  selectedCantidad: number = 1;
+  selectedPrecioUnitario: number = 0;
+  productosAgregados: ProductoAgregado[] = [];
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
     private fb: FormBuilder,
-     private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {
     this.facturaForm = this.fb.group({
       clienteId: [null, [Validators.required]],
@@ -98,6 +110,78 @@ export class FacturasComponent implements OnInit {
     })
   }
 
+  // Nuevos métodos para manejar la lista de productos
+  agregarProductoALista(): void {
+    if (!this.selectedProductoId || !this.selectedCantidad || this.selectedCantidad <= 0 || this.selectedPrecioUnitario <= 0) {
+      return;
+    }
+
+    // Verificar si el producto ya existe en la lista
+    const existingIndex = this.productosAgregados.findIndex(p => p.productoId === Number(this.selectedProductoId));
+
+    if (existingIndex >= 0) {
+      // Si existe, actualizar la cantidad
+      this.productosAgregados[existingIndex].cantidad += this.selectedCantidad;
+    } else {
+      // Si no existe, agregar nuevo producto
+      const nuevoProducto: ProductoAgregado = {
+        productoId: Number(this.selectedProductoId),
+        cantidad: this.selectedCantidad,
+        precioUnitario: this.selectedPrecioUnitario
+      };
+      this.productosAgregados.push(nuevoProducto);
+    }
+
+    // Limpiar los campos
+    this.limpiarCamposProducto();
+  }
+
+  removerProductoDeLista(index: number): void {
+    this.productosAgregados.splice(index, 1);
+  }
+
+  limpiarCamposProducto(): void {
+    this.selectedProductoId = null;
+    this.selectedCantidad = 1;
+    this.selectedPrecioUnitario = 0;
+  }
+
+  calcularTotalLista(): number {
+    return this.productosAgregados.reduce((total, producto) => {
+      return total + (producto.cantidad * producto.precioUnitario);
+    }, 0);
+  }
+
+  // Método para actualizar el precio cuando se selecciona un producto
+  onProductoSeleccionado(): void {
+    if (this.selectedProductoId) {
+      const producto = this.productos().find(p => p.id === Number(this.selectedProductoId));
+      if (producto) {
+        this.selectedPrecioUnitario = producto.precio;
+      }
+    } else {
+      this.selectedPrecioUnitario = 0;
+    }
+  }
+
+  // Método modificado para convertir la lista a FormArray antes de enviar
+  private convertirListaAFormArray(): void {
+    // Limpiar el FormArray actual
+    while (this.detallesArray.length) {
+      this.detallesArray.removeAt(0);
+    }
+
+    // Agregar cada producto de la lista al FormArray
+    this.productosAgregados.forEach(producto => {
+      const detalleGroup = this.fb.group({
+        productoId: [producto.productoId, [Validators.required]],
+        cantidad: [producto.cantidad, [Validators.required, Validators.min(1)]],
+        precioUnitario: [producto.precioUnitario, [Validators.required, Validators.min(0)]],
+      });
+      this.detallesArray.push(detalleGroup);
+    });
+  }
+
   addDetalle(): void {
     this.detallesArray.push(this.createDetalleFormGroup())
   }
@@ -108,7 +192,7 @@ export class FacturasComponent implements OnInit {
 
   updatePrecioUnitario(index: number): void {
     const detalleGroup = this.detallesArray.at(index) as FormGroup
-    const productoId = detalleGroup.get("productoId")?.value // ✅ camelCase correcto
+    const productoId = detalleGroup.get("productoId")?.value
 
     if (productoId) {
       const producto = this.productos().find((p) => p.id === Number(productoId))
@@ -124,13 +208,26 @@ export class FacturasComponent implements OnInit {
       this.detallesArray.removeAt(0);
     }
 
+    // Limpiar la lista de productos agregados
+    this.productosAgregados = [];
+    this.limpiarCamposProducto();
+
     if (factura) {
       this.editingFactura.set(factura);
       this.facturaForm.patchValue({
         clienteId: factura.clienteId,
         usuarioId: factura.usuarioId,
       });
-      // ...cargar detalles...
+
+      // Cargar detalles existentes a la lista
+      if (factura.detalles) {
+        this.productosAgregados = factura.detalles.map(detalle => ({
+          productoId: detalle.productoId,
+          cantidad: detalle.cantidad,
+          precioUnitario: detalle.precioUnitario
+        }));
+      }
+
       this.showForm.set(true);
     } else {
       this.editingFactura.set(null);
@@ -148,16 +245,13 @@ export class FacturasComponent implements OnInit {
             if (!usuariosActuales.some(u => u.id === usuarioCompleto.id)) {
               this.usuarios.set([...usuariosActuales, usuarioCompleto]);
             }
-            this.addDetalle();
             this.showForm.set(true);
           },
           error: () => {
-            this.addDetalle();
             this.showForm.set(true);
           }
         });
       } else {
-        this.addDetalle();
         this.showForm.set(true);
       }
     }
@@ -167,17 +261,22 @@ export class FacturasComponent implements OnInit {
     this.showForm.set(false)
     this.facturaForm.reset()
     this.editingFactura.set(null)
+    this.productosAgregados = [];
+    this.limpiarCamposProducto();
   }
 
   onSubmit(): void {
-    if (this.facturaForm.invalid) {
+    if (this.facturaForm.invalid || this.productosAgregados.length === 0) {
       return
     }
+
+    // Convertir la lista de productos a FormArray antes de enviar
+    this.convertirListaAFormArray();
 
     const facturaData = {
       ...this.facturaForm.value,
       fecha: new Date(),
-      total: this.calcularTotal(),
+      total: this.calcularTotalLista(),
     }
 
     if (this.editingFactura()) {
@@ -365,13 +464,13 @@ export class FacturasComponent implements OnInit {
   }
 
   cancelarFacturaVisual(factura: Factura): void {
-  const actualizadas = this.facturas().map(f =>
-    f.id === factura.id
-      ? { ...f, activa: true }
-      : f
-  );
-  this.facturas.set(actualizadas);
-  console.log('Se presionó cancelar factura visual');
-  this.cdr.detectChanges();
-}
+    const actualizadas = this.facturas().map(f =>
+      f.id === factura.id
+        ? { ...f, activa: true }
+        : f
+    );
+    this.facturas.set(actualizadas);
+    console.log('Se presionó cancelar factura visual');
+    this.cdr.detectChanges();
+  }
 }

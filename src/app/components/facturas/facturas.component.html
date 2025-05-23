@@ -87,7 +87,7 @@
   <!-- Modal de formulario -->
   @if (showForm()) {
   <div class="modal-overlay">
-    <div class="modal-container modal-lg">
+    <div class="modal-container modal-xl">
       <div class="modal-header">
         <h2>{{ editingFactura() ? 'Editar Factura' : 'Nueva Factura' }}</h2>
         <button class="btn-close" (click)="closeForm()">&times;</button>
@@ -112,77 +112,90 @@
             </div>
           </div>
 
-          <div class="detalles-section">
-            <div class="detalles-header">
-              <h3>Detalles de la Factura</h3>
-              <button type="button" class="btn btn-sm btn-outline" (click)="addDetalle()">
-                Añadir Producto
-              </button>
-            </div>
+          <!-- Nueva sección con layout de dos columnas -->
+          <div class="row">
+            <!-- Columna izquierda: Agregar producto -->
+            <div class="col-md-6">
+              <div class="agregar-producto-section">
+                <h3>Agregar Productos</h3>
 
-            <div formArrayName="detalles">
-              @for (detalle of detallesArray.controls; track $index) {
-              <div [formGroupName]="$index" class="detalle-item">
-                <div class="form-row">
-                  <div class="form-group col-md-5">
-                    <label>Producto</label>
-                    <select formControlName="productoId" class="form-control"
-                      [class.is-invalid]="detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched"
-                      (change)="updatePrecioUnitario($index)">
-                      <option [ngValue]="null">Seleccione un producto</option>
-                      @for (producto of productos(); track producto.id) {
-                      <option [value]="producto.id">{{ producto.nombre }} - ${{ producto.precio.toFixed(2) }}</option>
-                      }
-                    </select>
-                    @if (detalle.get('producto_id')?.invalid && detalle.get('producto_id')?.touched) {
-                    <div class="invalid-feedback">
-                      Debe seleccionar un producto
-                    </div>
+                <div class="form-group">
+                  <label>Producto</label>
+                  <select [(ngModel)]="selectedProductoId" class="form-control" [ngModelOptions]="{standalone: true}"
+                          (change)="onProductoSeleccionado()">
+                    <option [ngValue]="null">Seleccione un producto</option>
+                    @for (producto of productos(); track producto.id) {
+                    <option [value]="producto.id">{{ producto.nombre }} - ${{ producto.precio.toFixed(2) }}</option>
                     }
-                  </div>
-
-                  <div class="form-group col-md-3">
-                    <label>Cantidad</label>
-                    <input type="number" formControlName="cantidad" class="form-control"
-                      [class.is-invalid]="detalle.get('cantidad')?.invalid && detalle.get('cantidad')?.touched" min="1">
-                    @if (detalle.get('cantidad')?.invalid && detalle.get('cantidad')?.touched) {
-                    <div class="invalid-feedback">
-                      La cantidad debe ser mayor a 0
-                    </div>
-                    }
-                  </div>
-
-                  <div class="form-group col-md-3">
-                    <label>Precio Unitario</label>
-                    <input type="number" formControlName="precioUnitario" class="form-control"
-                      [class.is-invalid]="detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched"
-                      step="0.01" min="0">
-                    @if (detalle.get('precio_unitario')?.invalid && detalle.get('precio_unitario')?.touched) {
-                    <div class="invalid-feedback">
-                      El precio debe ser mayor o igual a 0
-                    </div>
-                    }
-                  </div>
-
-                  <div class="form-group col-md-1 d-flex align-items-end">
-                    <button type="button" class="btn btn-sm btn-danger" (click)="removeDetalle($index)"
-                      [disabled]="detallesArray.length <= 1">
-                      &times;
-                    </button>
-                  </div>
+                  </select>
                 </div>
+
+                <div class="form-group">
+                  <label>Cantidad</label>
+                  <input type="number" [(ngModel)]="selectedCantidad" class="form-control"
+                    [ngModelOptions]="{standalone: true}" min="1" placeholder="1">
+                </div>
+
+                <button type="button" class="btn btn-success btn-block" (click)="agregarProductoALista()"
+                  [disabled]="!selectedProductoId || !selectedCantidad || selectedCantidad <= 0 || selectedPrecioUnitario <= 0">
+                  Agregar Producto
+                </button>
               </div>
-              }
             </div>
 
-            <div class="total-section">
-              <h4>Total: ${{ calcularTotal().toFixed(2) }}</h4>
+            <!-- Columna derecha: Lista de productos agregados -->
+            <div class="col-md-6">
+              <div class="productos-agregados-section">
+                <h3>Productos Agregados</h3>
+
+                @if (productosAgregados.length === 0) {
+                <div class="alert alert-info">
+                  No hay productos agregados aún
+                </div>
+                } @else {
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                  <table class="table table-sm">
+                    <thead class="thead-light">
+                      <tr>
+                        <th>Producto</th>
+                        <th>Cant.</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (producto of productosAgregados; track $index) {
+                      <tr>
+                        <td>{{ getProductoNombre(producto.productoId) }}</td>
+                        <td>{{ producto.cantidad }}</td>
+                        <td>${{ producto.precioUnitario.toFixed(2) }}</td>
+                        <td>${{ (producto.cantidad * producto.precioUnitario).toFixed(2) }}</td>
+                        <td>
+                          <button type="button" class="btn btn-sm btn-danger" (click)="removerProductoDeLista($index)">
+                            &times;
+                          </button>
+                        </td>
+                      </tr>
+                      }
+                    </tbody>
+                    <tfoot>
+                      <tr class="table-active">
+                        <td colspan="3"><strong>Total:</strong></td>
+                        <td><strong>${{ calcularTotalLista().toFixed(2) }}</strong></td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+                }
+              </div>
             </div>
           </div>
 
-          <div class="form-actions">
+          <div class="form-actions mt-3">
             <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancelar</button>
-            <button type="submit" class="btn btn-primary" [disabled]="facturaForm.invalid">
+            <button type="submit" class="btn btn-primary" [disabled]="facturaForm.invalid || productosAgregados.length === 0">
               {{ editingFactura() ? 'Actualizar' : 'Crear' }}
             </button>
           </div>
