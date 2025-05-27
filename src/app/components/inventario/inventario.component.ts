@@ -40,7 +40,6 @@ export class InventarioComponent implements OnInit {
           inventarioDTO: this.fb.group({
             cantidadActual: [0, [Validators.required, Validators.min(0)]],
             cantidadInicial: [0, [Validators.required, Validators.min(0)]],
-            minimoRequerido: [0, [Validators.required, Validators.min(0)]]
           })
     });
 
@@ -65,7 +64,6 @@ export class InventarioComponent implements OnInit {
     next: (productos) => {
       this.productos.set(productos);
 
-      // Obtener IDs únicos de proveedores
       const proveedorIds = Array.from(new Set(productos.map(p => p.proveedorId)));
 
       const proveedoresCargados: Proveedor[] = [];
@@ -111,7 +109,6 @@ export class InventarioComponent implements OnInit {
     if (confirm('¿Está seguro de eliminar este producto?')) {
       this.apiService.deleteProducto(id).subscribe({
         next: () => {
-          // Eliminar de la lista de productos
           this.productos.set(this.productos().filter(p => p.id !== id));
         },
         error: (err) => {
@@ -128,7 +125,6 @@ export class InventarioComponent implements OnInit {
 
   openSolicitudModal(): void {
     this.showSolicitudModal.set(true);
-    // Reinicia el formulario cada vez que se abre
     this.solicitudForm.setControl('productos', this.fb.array([
       this.fb.group({
         productoId: [null, Validators.required],

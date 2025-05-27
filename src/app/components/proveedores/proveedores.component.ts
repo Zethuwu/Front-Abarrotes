@@ -79,10 +79,8 @@ export class ProveedoresComponent implements OnInit {
     const proveedorData = this.proveedorForm.value
 
     if (this.editingProveedor()) {
-      // Actualizar proveedor existente
       this.apiService.updateProveedor(this.editingProveedor()!.id, proveedorData).subscribe({
         next: (updatedProveedor) => {
-          // Actualizar la lista de proveedores
           const updatedProveedores = this.proveedores().map((p) =>
             p.id === updatedProveedor.id ? updatedProveedor : p,
           )
@@ -95,10 +93,8 @@ export class ProveedoresComponent implements OnInit {
         },
       })
     } else {
-      // Crear nuevo proveedor
       this.apiService.createProveedor(proveedorData).subscribe({
         next: (newProveedor) => {
-          // Añadir a la lista de proveedores
           this.proveedores.set([...this.proveedores(), newProveedor])
           this.closeForm()
         },
@@ -114,7 +110,6 @@ export class ProveedoresComponent implements OnInit {
     if (confirm("¿Está seguro de eliminar este proveedor?")) {
       this.apiService.deleteProveedor(id).subscribe({
         next: () => {
-          // Eliminar de la lista de proveedores
           this.proveedores.set(this.proveedores().filter((p) => p.id !== id))
         },
         error: (err) => {

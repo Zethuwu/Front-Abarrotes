@@ -31,7 +31,6 @@ export interface InventarioDTO {
   id: number;
   cantidadActual: number;
   cantidadInicial: number;
-  minimoRequerido: number;
   producto_id: number;
 }
 
@@ -40,7 +39,7 @@ export interface Usuario {
   nombre: string;
   username: string;
   password: string;
-  roles: any[]; // O mejor: (string[] | { id: number }[])
+  roles: any[];
 }
 
 export interface Proveedor {

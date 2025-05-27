@@ -30,7 +30,6 @@ export class CorteCajaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Nada en ngOnInit aún
   }
 
   buscarCorteCaja(): void {

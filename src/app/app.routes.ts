@@ -15,7 +15,6 @@ export const routes: Routes = [
     loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [authGuard]
   },
-  // Rutas que requieren permisos de ADMIN
   {
     path: 'productos',
     children: [

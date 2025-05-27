@@ -21,24 +21,16 @@ export class AuthInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    // Asegurarse de que todas las peticiones incluyan cookies de sesión
-    // Esto es fundamental para mantener la autenticación basada en sesiones
     const authReq = request.clone({
       withCredentials: true
     });
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Manejar errores de autenticación (401) y autorización (403)
         if (error.status === 401) {
-          // No manejar errores 401 en endpoints de login
           if (!request.url.includes('/auth/login')) {
-            // Limpiar estado de autenticación y redirigir a login
-
           }
         }
-
-        // Para errores 403 (Prohibido), redirigir a página de no autorizado
         else if (error.status === 403) {
           this.router.navigate(['/unauthorized']);
         }

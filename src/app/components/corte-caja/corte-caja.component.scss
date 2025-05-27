@@ -1,4 +1,3 @@
-/* Contenedor principal */
 .corte-caja-container {
   max-width: 1200px;
   margin: 2rem auto;
@@ -9,7 +8,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Título principal */
 .corte-caja-title {
   font-size: 2rem;
   font-weight: 600;
@@ -18,7 +16,6 @@
   text-align: center;
 }
 
-/* Formulario de búsqueda */
 .fecha-form {
   display: flex;
   flex-wrap: wrap;
@@ -63,7 +60,6 @@
   background-color: #1d4ed8;
 }
 
-/* Tabla */
 .table-container {
   overflow-x: auto;
   background-color: white;
@@ -106,7 +102,6 @@ tbody tr:hover {
   transition: background-color 0.2s ease;
 }
 
-/* Estado de carga y errores */
 .loading,
 .error {
   margin-top: 1rem;

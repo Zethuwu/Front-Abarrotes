@@ -83,10 +83,8 @@ export class ClientesComponent implements OnInit {
     const clienteData = this.clienteForm.value;
 
     if (this.editingCliente()) {
-      // Actualizar cliente existente
       this.apiService.updateCliente(this.editingCliente()!.id, clienteData).subscribe({
         next: (updatedCliente) => {
-          // Actualizar la lista de clientes
           const updatedClientes = this.clientes().map(c =>
             c.id === updatedCliente.id ? updatedCliente : c
           );
@@ -99,10 +97,8 @@ export class ClientesComponent implements OnInit {
         }
       });
     } else {
-      // Crear nuevo cliente
       this.apiService.createCliente(clienteData).subscribe({
         next: (newCliente) => {
-          // Añadir a la lista de clientes
           this.clientes.set([...this.clientes(), newCliente]);
           this.closeForm();
         },
@@ -118,7 +114,6 @@ export class ClientesComponent implements OnInit {
     if (confirm('¿Está seguro de eliminar este cliente?')) {
       this.apiService.deleteCliente(id).subscribe({
         next: () => {
-          // Eliminar de la lista de clientes
           this.clientes.set(this.clientes().filter(c => c.id !== id));
         },
         error: (err) => {

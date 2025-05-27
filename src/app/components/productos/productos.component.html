@@ -27,7 +27,6 @@
     @for (producto of productos(); track producto.id) {
     <div class="producto-card">
       <div class="producto-imagen">
-        <!-- Aquí está el cambio principal para las imágenes -->
         <img [src]="producto.imagenUrl ? ('http://localhost:8081' + producto.imagenUrl) : 'assets/placeholder.jpg'"
           [alt]="producto.nombre">
       </div>
@@ -47,7 +46,6 @@
   }
   }
 
-  <!-- Modal de formulario -->
   @if (showForm()) {
   <div class="modal-overlay">
     <div class="modal-container">
@@ -102,7 +100,6 @@
             @if (editingProducto() && editingProducto()?.imagenUrl) {
             <div class="current-image mt-2">
               <p>Imagen actual: {{ getImageName(editingProducto()?.imagenUrl) }}</p>
-              <!-- Vista previa de la imagen actual -->
               <img [src]="'http://localhost:8081' + editingProducto()?.imagenUrl" alt="Vista previa"
                 (error)="handleImageError($event)">
             </div>
@@ -130,12 +127,6 @@
               <label for="cantidadInicial">Cantidad Inicial</label>
               <input type="number" id="cantidadInicial" formControlName="cantidadInicial" class="form-control" min="1"
                 value="1">
-            </div>
-
-            <div class="form-group">
-              <label for="minimoRequerido">Mínimo Requerido</label>
-              <input type="number" id="minimoRequerido" formControlName="minimoRequerido" class="form-control" min="1"
-                value="">
             </div>
           </div>
 

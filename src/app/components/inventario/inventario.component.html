@@ -14,7 +14,6 @@
           <th>Proveedor</th>
           <th>Cantidad Actual</th>
           <th>Cantidad Inicial</th>
-          <th>Mínimo Requerido</th>
         </tr>
       </thead>
       <tbody>
@@ -25,17 +24,14 @@
           <td>{{ getNombreProveedor(producto.proveedorId) }}</td>
           <td>{{ producto.inventarioDTO?.cantidadActual }}</td>
           <td>{{ producto.inventarioDTO?.cantidadInicial }}</td>
-          <td>{{ producto.inventarioDTO?.minimoRequerido }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Modal opcional -->
   <div class="modal" *ngIf="showForm()">
     <div class="modal-content">
       <h2>{{ editingProducto() ? 'Editar' : 'Agregar' }} Producto</h2>
-        <!-- campos del formulario aquí -->
         <div class="modal-actions">
           <button type="submit" class="btn-save">Guardar</button>
         </div>

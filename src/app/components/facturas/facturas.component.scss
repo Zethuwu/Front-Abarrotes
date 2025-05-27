@@ -25,17 +25,17 @@
 .facturas-filtros {
   margin-bottom: 1.5rem;
   display: flex;
-  gap: 3rem; // Más separación entre buscadores
+  gap: 3rem;
   flex-wrap: wrap;
 
   .form-group {
-    flex: 0 0 180px; // Hace los campos más pequeños
+    flex: 0 0 180px;
     min-width: 140px;
     max-width: 200px;
     margin-right: 10rem;
   }
    &:last-child {
-      margin-right: 0; // Elimina margen del último elemento
+      margin-right: 0;
     }
 
   input.form-control {
@@ -102,7 +102,6 @@
   gap: 0.5rem;
 }
 
-/* Botones */
 .btn {
   display: inline-block;
   font-weight: 500;
@@ -167,7 +166,6 @@
   font-size: 0.875rem;
 }
 
-/* Badges */
 .badge {
   display: inline-block;
   padding: 0.25rem 0.5rem;
@@ -184,7 +182,6 @@
   background-color: #ff0000;
 }
 
-/* Alertas */
 .alert {
   padding: 0.75rem 1.25rem;
   margin-bottom: 1rem;
@@ -202,7 +199,6 @@
   border: 1px solid #bae6fd;
 }
 
-/* Spinner */
 .loading-spinner {
   display: flex;
   flex-direction: column;
@@ -222,7 +218,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; width: 100vw; height: 100vh;
@@ -273,7 +268,6 @@
   padding: 1.5rem;
 }
 
-/* Formulario */
 .form-group {
   margin-bottom: 1.25rem;
   label {
@@ -318,7 +312,6 @@
     min-width: 0;
   }
 
-  /* Espacio extra entre cantidad, precio y el botón eliminar */
   .campo-cantidad,
   .campo-precio {
     margin-right: 0.75rem;
@@ -336,17 +329,16 @@
   margin-top: 1.5rem;
 }
 
-/* Secciones del formulario de factura */
 .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem; // Adds space between columns
+  gap: 2rem;
   margin: 1rem 0;
 }
 
 .col-md-6 {
   flex: 1;
-  min-width: 300px; // Minimum width before stacking
+  min-width: 300px;
   padding: 0;
 }
 
@@ -368,7 +360,7 @@
     font-weight: 600;
     border-bottom: 2px solid #e2e8f0;
     padding-bottom: 0.75rem;
-    margin: -1.5rem -1.5rem 1.5rem -1.5rem; // Full-width header
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
     padding: 1.5rem;
     background-color: #f8fafc;
   }
@@ -433,7 +425,6 @@
   }
 }
 
-/* Detalles de factura */
 .detalles-section {
   margin-top: 1.5rem;
   border: 1px solid #e5e7eb;
@@ -472,7 +463,6 @@
   }
 }
 
-/* Footer y acciones */
 .factura-footer {
   margin-top: 2rem;
   text-align: center;
@@ -492,7 +482,6 @@
   margin-top: 1.5rem;
 }
 
-/* Utilidades */
 .text-center {
   text-align: center;
 }
@@ -511,7 +500,6 @@
   width: 100%;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .col-md-6 {
     flex: 0 0 100%;

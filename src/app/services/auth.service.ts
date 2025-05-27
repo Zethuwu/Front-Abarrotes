@@ -23,21 +23,16 @@ export class AuthService {
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
-      // Al iniciar el servicio, verificar si hay una sesión activa
       this.checkSession();
     }
   }
 
-  /**
-   * Realiza login con credenciales y mantiene la sesión
-   */
   login(credentials: LoginRequest): Observable<any> {
     return this.http.post<any>(`${this.authUrl}/login`, credentials, {
-      withCredentials: true, // Importante: permitir cookies
-      observe: 'response' // Para acceder a las cabeceras de respuesta
+      withCredentials: true,
+      observe: 'response'
     }).pipe(
       tap(response => {
-        // Después de iniciar sesión, obtener la información del usuario
         this.getUserInfo().subscribe();
       }),
       catchError(error => {
@@ -49,7 +44,7 @@ export class AuthService {
 
   getUserInfo(): Observable<any> {
     return this.http.get<Usuario>(`${this.authUrl}/user-info`, {
-      withCredentials: true // Importante: enviar cookies
+      withCredentials: true
     }).pipe(
       tap(user => {
         this.currentUserSignal.set(user);
@@ -70,24 +65,18 @@ export class AuthService {
         this.router.navigate(['/login']);
       }),
       catchError(error => {
-        // En caso de error, igualmente limpiamos datos locales
         this.currentUserSignal.set(null);
         this.router.navigate(['/login']);
-        return of(null); // No propagamos el error
+        return of(null);
       })
     );
   }
 
-  /**
-   * Verifica si hay una sesión activa al cargar la aplicación
-   */
   private checkSession(): void {
     this.getUserInfo().subscribe({
       next: () => {
-        // Sesión válida, no hacemos nada adicional
       },
       error: () => {
-        // Sin sesión válida, redirigir al login si no estamos ya allí
         if (!this.router.url.includes('/login')) {
           this.router.navigate(['/login']);
         }
@@ -95,17 +84,11 @@ export class AuthService {
     });
   }
 
-  /**
-   * Verifica si el usuario tiene un rol específico
-   */
   hasRole(role: string): boolean {
     const user = this.currentUserSignal();
     return !!user?.roles?.includes(role);
   }
 
-  /**
-   * Verifica si el usuario es administrador
-   */
   isAdmin(): boolean {
     const user = this.currentUserSignal();
     return !!user?.roles?.includes('ROLE_ADMIN');

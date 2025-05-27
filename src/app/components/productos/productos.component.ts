@@ -40,7 +40,6 @@ export class ProductosComponent implements OnInit {
       proveedorId: [null, [Validators.required]],
       inventarioDTO: this.fb.group({
         cantidadInicial: [1, [Validators.required, Validators.min(1), this.dosDecimalesValidator]],
-        minimoRequerido: [1, [Validators.required, Validators.min(1), this.dosDecimalesValidator]],
       })
     });
   }
@@ -51,8 +50,6 @@ export class ProductosComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true);
-
-    // Cargar productos
     this.apiService.getProductos().subscribe({
       next: (productos) => {
         this.productos.set(productos);
@@ -65,7 +62,6 @@ export class ProductosComponent implements OnInit {
       }
     });
 
-    // Cargar proveedores para el formulario
     this.apiService.getProveedores().subscribe({
       next: (proveedores) => {
         this.proveedores.set(proveedores);
@@ -88,10 +84,8 @@ export class ProductosComponent implements OnInit {
         inventarioDTO: {
           cantidadActual: producto.inventarioDTO?.cantidadActual ?? 1,
           cantidadInicial: producto.inventarioDTO?.cantidadInicial ?? 1,
-          minimoRequerido: producto.inventarioDTO?.minimoRequerido ?? 1
         }
       });
-      // Limpiamos el archivo seleccionado al abrir el formulario
       this.selectedFile.set(null);
     } else {
       this.editingProducto.set(null);
@@ -104,7 +98,6 @@ export class ProductosComponent implements OnInit {
         inventarioDTO: {
           cantidadActual: 1,
           cantidadInicial: 1,
-          minimoRequerido: 1
         }
       });
       this.selectedFile.set(null);
@@ -129,16 +122,13 @@ export class ProductosComponent implements OnInit {
 
   getImageName(imagePath: string | undefined): string {
     if (!imagePath) return 'No hay imagen';
-    // Obtener el nombre del archivo de la ruta completa
     const parts = imagePath.split('/');
     return parts[parts.length - 1];
   }
 
-  // Nuevo método para manejar errores de carga de imágenes
   handleImageError(event: Event): void {
     const imgElement = event.target as HTMLImageElement;
     console.error('Error al cargar la imagen:', imgElement.src);
-    // Establecer una imagen de respaldo
     imgElement.src = 'assets/placeholder.jpg';
   }
 
@@ -150,16 +140,13 @@ export class ProductosComponent implements OnInit {
     const productoData = this.productoForm.value;
 
     if (this.editingProducto()) {
-      // Actualizar producto existente
       this.apiService.updateProducto(this.editingProducto()!.id, productoData).subscribe({
         next: (updatedProducto) => {
-          console.log('Producto actualizado:', updatedProducto); // Depuración
+          console.log('Producto actualizado:', updatedProducto);
 
-          // Si hay un archivo seleccionado, subimos la imagen
           if (this.selectedFile()) {
             this.uploadImage(updatedProducto.id, this.selectedFile()!);
           } else {
-            // Si no hay archivo seleccionado, actualizamos la lista de productos
             const updatedProductos = this.productos().map(p =>
               p.id === updatedProducto.id ? updatedProducto : p
             );
@@ -173,16 +160,12 @@ export class ProductosComponent implements OnInit {
         }
       });
     } else {
-      // Crear nuevo producto
       this.apiService.createProducto(productoData).subscribe({
         next: (newProducto) => {
-          console.log('Nuevo producto creado:', newProducto); // Depuración
-
-          // Si hay un archivo seleccionado, subimos la imagen
+          console.log('Nuevo producto creado:', newProducto);
           if (this.selectedFile()) {
             this.uploadImage(newProducto.id, this.selectedFile()!);
           } else {
-            // Si no hay archivo seleccionado, añadimos el producto a la lista
             this.productos.set([...this.productos(), newProducto]);
             this.closeForm();
           }
@@ -196,16 +179,14 @@ export class ProductosComponent implements OnInit {
   }
 
   uploadImage(productoId: number, file: File): void {
-    console.log('Subiendo imagen para el producto ID:', productoId); // Depuración
+    console.log('Subiendo imagen para el producto ID:', productoId);
 
     this.apiService.uploadProductoImage(productoId, file).subscribe({
       next: () => {
-        console.log('Imagen subida correctamente'); // Depuración
-
-        // Recargar los productos para obtener la URL de imagen actualizada
+        console.log('Imagen subida correctamente');
         this.apiService.getProductos().subscribe({
           next: (productos) => {
-            console.log('Productos actualizados después de subir imagen:', productos); // Depuración
+            console.log('Productos actualizados después de subir imagen:', productos);
             this.productos.set(productos);
             this.closeForm();
           }
@@ -214,8 +195,6 @@ export class ProductosComponent implements OnInit {
       error: (err) => {
         console.error('Error uploading image', err);
         this.error.set('Error al subir la imagen');
-
-        // Aún así cerramos el formulario y actualizamos la lista, pero sin la imagen
         this.apiService.getProductos().subscribe({
           next: (productos) => {
             this.productos.set(productos);
@@ -230,7 +209,6 @@ export class ProductosComponent implements OnInit {
     if (confirm('¿Está seguro de eliminar este producto?')) {
       this.apiService.deleteProducto(id).subscribe({
         next: () => {
-          // Eliminar de la lista de productos
           this.productos.set(this.productos().filter(p => p.id !== id));
         },
         error: (err) => {

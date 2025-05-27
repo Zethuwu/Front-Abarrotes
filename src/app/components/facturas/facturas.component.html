@@ -84,7 +84,6 @@
   }
   }
 
-  <!-- Modal de formulario -->
   @if (showForm()) {
   <div class="modal-overlay">
     <div class="modal-container modal-xl">
@@ -112,9 +111,7 @@
             </div>
           </div>
 
-          <!-- Nueva sección con layout de dos columnas -->
           <div class="row">
-            <!-- Columna izquierda: Agregar producto -->
             <div class="col-md-6">
               <div class="agregar-producto-section">
                 <h3>Agregar Productos</h3>
@@ -142,8 +139,6 @@
                 </button>
               </div>
             </div>
-
-            <!-- Columna derecha: Lista de productos agregados -->
             <div class="col-md-6">
               <div class="productos-agregados-section">
                 <h3>Productos Agregados</h3>
@@ -205,7 +200,6 @@
   </div>
   }
 
-  <!-- Modal de detalles -->
   @if (showDetalles() !== null && selectedFactura()) {
   <div class="modal-overlay">
     <div class="modal-container modal-lg">

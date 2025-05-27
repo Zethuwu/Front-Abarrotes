@@ -37,7 +37,6 @@ export class FacturasComponent implements OnInit {
   busquedaCliente = '';
   busquedaUsuario = '';
 
-  // Nuevas propiedades para el sistema de agregar productos
   selectedProductoId: number | null = null;
   selectedCantidad: number = 1;
   selectedPrecioUnitario: number = 0;
@@ -66,8 +65,6 @@ export class FacturasComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true)
-
-    // Cargar clientes
     this.apiService.getClientes().subscribe({
       next: (clientes) => {
         this.clientes.set(clientes)
@@ -77,7 +74,6 @@ export class FacturasComponent implements OnInit {
       },
     })
 
-    // Cargar usuarios
     this.apiService.getUsuarios().subscribe({
       next: (usuarios) => {
         this.usuarios.set(usuarios)
@@ -87,7 +83,6 @@ export class FacturasComponent implements OnInit {
       },
     })
 
-    // Cargar productos
     this.apiService.getProductos().subscribe({
       next: (productos) => {
         this.productos.set(productos)
@@ -110,20 +105,16 @@ export class FacturasComponent implements OnInit {
     })
   }
 
-  // Nuevos métodos para manejar la lista de productos
   agregarProductoALista(): void {
     if (!this.selectedProductoId || !this.selectedCantidad || this.selectedCantidad <= 0 || this.selectedPrecioUnitario <= 0) {
       return;
     }
 
-    // Verificar si el producto ya existe en la lista
     const existingIndex = this.productosAgregados.findIndex(p => p.productoId === Number(this.selectedProductoId));
 
     if (existingIndex >= 0) {
-      // Si existe, actualizar la cantidad
       this.productosAgregados[existingIndex].cantidad += this.selectedCantidad;
     } else {
-      // Si no existe, agregar nuevo producto
       const nuevoProducto: ProductoAgregado = {
         productoId: Number(this.selectedProductoId),
         cantidad: this.selectedCantidad,
@@ -131,8 +122,6 @@ export class FacturasComponent implements OnInit {
       };
       this.productosAgregados.push(nuevoProducto);
     }
-
-    // Limpiar los campos
     this.limpiarCamposProducto();
   }
 
@@ -152,7 +141,6 @@ export class FacturasComponent implements OnInit {
     }, 0);
   }
 
-  // Método para actualizar el precio cuando se selecciona un producto
   onProductoSeleccionado(): void {
     if (this.selectedProductoId) {
       const producto = this.productos().find(p => p.id === Number(this.selectedProductoId));
@@ -164,14 +152,11 @@ export class FacturasComponent implements OnInit {
     }
   }
 
-  // Método modificado para convertir la lista a FormArray antes de enviar
   private convertirListaAFormArray(): void {
-    // Limpiar el FormArray actual
     while (this.detallesArray.length) {
       this.detallesArray.removeAt(0);
     }
 
-    // Agregar cada producto de la lista al FormArray
     this.productosAgregados.forEach(producto => {
       const detalleGroup = this.fb.group({
         productoId: [producto.productoId, [Validators.required]],
@@ -208,7 +193,6 @@ export class FacturasComponent implements OnInit {
       this.detallesArray.removeAt(0);
     }
 
-    // Limpiar la lista de productos agregados
     this.productosAgregados = [];
     this.limpiarCamposProducto();
 
@@ -219,7 +203,6 @@ export class FacturasComponent implements OnInit {
         usuarioId: factura.usuarioId,
       });
 
-      // Cargar detalles existentes a la lista
       if (factura.detalles) {
         this.productosAgregados = factura.detalles.map(detalle => ({
           productoId: detalle.productoId,
@@ -232,7 +215,6 @@ export class FacturasComponent implements OnInit {
     } else {
       this.editingFactura.set(null);
 
-      // Obtén el username del usuario logueado
       const usuarioActual = this.authService.currentUserSignal();
       if (usuarioActual?.username) {
         this.apiService.getUsuarioByUsername(usuarioActual.username).subscribe({
@@ -240,7 +222,6 @@ export class FacturasComponent implements OnInit {
             this.facturaForm.patchValue({
               usuarioId: usuarioCompleto.id
             });
-            // Agrega el usuario a la lista si no existe
             const usuariosActuales = this.usuarios();
             if (!usuariosActuales.some(u => u.id === usuarioCompleto.id)) {
               this.usuarios.set([...usuariosActuales, usuarioCompleto]);
@@ -270,7 +251,6 @@ export class FacturasComponent implements OnInit {
       return
     }
 
-    // Convertir la lista de productos a FormArray antes de enviar
     this.convertirListaAFormArray();
 
     const facturaData = {
@@ -280,10 +260,8 @@ export class FacturasComponent implements OnInit {
     }
 
     if (this.editingFactura()) {
-      // Actualizar factura existente
       this.apiService.updateFactura(this.editingFactura()!.id, facturaData).subscribe({
         next: (updatedFactura) => {
-          // Actualizar la lista de facturas
           const updatedFacturas = this.facturas().map((f) => (f.id === updatedFactura.id ? updatedFactura : f))
           this.facturas.set(updatedFacturas)
           this.closeForm()
@@ -294,11 +272,9 @@ export class FacturasComponent implements OnInit {
         },
       })
     } else {
-      // Crear nueva factura
       this.apiService.createFactura(facturaData).subscribe({
         next: (newFactura) => {
           this.facturas.set([...this.facturas(), newFactura]);
-          // Mostrar el resumen y agradecimiento
           this.selectedFactura.set(newFactura);
           this.showDetalles.set(newFactura.id);
           this.closeForm();
@@ -351,11 +327,9 @@ export class FacturasComponent implements OnInit {
   viewDetalles(factura: Factura): void {
     this.selectedFactura.set(factura)
 
-    // Si la factura no tiene detalles, cargarlos
     if (!factura.detalles) {
       this.apiService.getFactura(factura.id).subscribe({
         next: (facturaCompleta) => {
-          // Actualizar la factura en la lista
           const updatedFacturas = this.facturas().map((f) => (f.id === facturaCompleta.id ? facturaCompleta : f))
           this.facturas.set(updatedFacturas)
           this.selectedFactura.set(facturaCompleta)
@@ -379,7 +353,6 @@ export class FacturasComponent implements OnInit {
     if (confirm("¿Está seguro de eliminar esta factura?")) {
       this.apiService.deleteFactura(id).subscribe({
         next: () => {
-          // Eliminar de la lista de facturas
           this.facturas.set(this.facturas().filter((f) => f.id !== id))
         },
         error: (err) => {
@@ -445,7 +418,7 @@ export class FacturasComponent implements OnInit {
   resetFiltros(): void {
     this.busquedaCliente = '';
     this.busquedaUsuario = '';
-    this.loadData(); // Vuelve a cargar todas las facturas
+    this.loadData();
   }
 
   imprimirFactura(): void {

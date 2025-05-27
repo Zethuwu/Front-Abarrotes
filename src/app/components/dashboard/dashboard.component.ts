@@ -5,7 +5,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Producto, InventarioDTO, Usuario } from '../../models/interfaces';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms'; // <-- Agrega esto
+import { ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -16,11 +16,11 @@ import { AuthService } from '../../services/auth.service';
   imports: [
     CommonModule,
     RouterModule,
-    ReactiveFormsModule // <-- Y esto
+    ReactiveFormsModule
   ]
 })
 export class DashboardComponent implements OnInit {
-  // Usando signals para el estado
+
   editingUsuario: Usuario | null = null;
   productos = signal<Producto[]>([]);
   inventarioBajo = signal<InventarioDTO[]>([]);
@@ -87,7 +87,6 @@ export class DashboardComponent implements OnInit {
   };
 
   if (this.editingUsuario && this.editingUsuario.id !== undefined) {
-    // Actualizar usuario existente
     this.apiService.updateUsuario(this.editingUsuario.id, usuarioParaGuardar).subscribe({
       next: () => {
         this.loadUsuarios();
@@ -97,7 +96,6 @@ export class DashboardComponent implements OnInit {
       error: () => alert('Error al actualizar usuario')
     });
   } else {
-    // Crear usuario nuevo
     this.apiService.createUsuario(usuarioParaGuardar).subscribe({
       next: () => {
         this.loadUsuarios();
@@ -129,10 +127,10 @@ export class DashboardComponent implements OnInit {
   this.usuarioForm.patchValue({
     nombre: usuario.nombre,
     username: usuario.username,
-    password: '', // Deja vacío o pide que se cambie solo si se desea
+    password: '',
     roles: usuario.roles.map((rol: any) => typeof rol === 'string' ? null : rol.id).filter(id => id !== null)
   });
-  this.editingUsuario = usuario; // Crea una variable para saber si estás editando
+  this.editingUsuario = usuario;
   this.showCrearUsuario.set(true);
 }
 }

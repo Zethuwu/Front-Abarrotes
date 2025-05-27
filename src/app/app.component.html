@@ -1,5 +1,4 @@
 <div class="app-container">
-  <!-- Navbar - Solo se muestra si está autenticado y no está en la página de login -->
   @if (authService.isAuthenticated() && authService.currentUser()?.roles && currentRoute !== '/login') {
   <nav class="navbar">
     <div class="navbar-brand">
@@ -34,8 +33,6 @@
     </div>
   </nav>
   }
-
-  <!-- Contenido principal -->
   <main class="main-content" [class.with-navbar]="authService.isAuthenticated() && currentRoute !== '/login'">
     <router-outlet></router-outlet>
   </main>
